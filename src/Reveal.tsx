@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import type { Reveal as Kind } from './settings'
 import { plasma } from './math'
 
-// How the backdrop arrives. Every kind but zoom lays a cover the colour of the page over the content
-// and takes it away; zoom scales and unblurs the content itself. The cover is dropped once done.
+// How the background arrives. Every kind but zoom lays a cover over the content and takes it away;
+// zoom scales and unblurs the content itself. Nothing moves until `ready` (image decoded, shader's
+// first frame), so the reveal never uncovers an empty page. `run` replays it without remounting the content.
 
 const COLS = 12, ROWS = 7
 
@@ -33,18 +34,19 @@ function Plasma({ ms, onDone }: { ms: number; onDone: () => void }) {
   return <canvas ref={ref} className="cover plasma" />
 }
 
-export function Reveal({ kind, ms, children }: { kind: Kind; ms: number; children?: ReactNode }) {
+export function Reveal({ kind, ms, ready = true, run = 0, children }: { kind: Kind; ms: number; ready?: boolean; run?: number; children?: ReactNode }) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
   const k: Kind = reduced && kind !== 'none' ? 'fade' : kind
   const [done, setDone] = useState(k === 'none')
+  useEffect(() => setDone(k === 'none'), [run, k])
   const end = () => setDone(true)
-  const style = { '--ms': `${ms}ms` } as CSSProperties
+  const covered = !done && k !== 'zoom'
   return (
-    <div className="reveal" data-kind={k} data-done={done || undefined} style={style}>
+    <div className="reveal" data-kind={k} data-ready={ready || undefined} data-done={done || undefined} data-run={run % 2} style={{ '--ms': `${ms}ms` } as CSSProperties}>
       <div className="reveal-content" onAnimationEnd={e => e.target === e.currentTarget && end()}>{children}</div>
-      {!done && k === 'plasma' && <Plasma ms={ms} onDone={end} />}
-      {!done && k === 'grid' && (
-        <div className="cover cells" onAnimationEnd={e => (e.target as HTMLElement).dataset.last != null && end()}>
+      {covered && k === 'plasma' && (ready ? <Plasma key={run} ms={ms} onDone={end} /> : <div className="cover" />)}
+      {covered && k === 'grid' && (
+        <div key={run} className="cover cells" onAnimationEnd={e => (e.target as HTMLElement).dataset.last != null && end()}>
           {Array.from({ length: COLS * ROWS }, (_, i) => {
             const x = i % COLS - (COLS - 1) / 2, y = Math.floor(i / COLS) - (ROWS - 1) / 2
             const d = Math.hypot(x / COLS, y / ROWS) / Math.hypot(0.5, 0.5) // 0 centre .. 1 corner
@@ -52,7 +54,7 @@ export function Reveal({ kind, ms, children }: { kind: Kind; ms: number; childre
           })}
         </div>
       )}
-      {!done && !['plasma', 'grid', 'zoom', 'none'].includes(k) && <div className="cover" onAnimationEnd={end} />}
+      {covered && !['plasma', 'grid'].includes(k) && <div key={run} className="cover" onAnimationEnd={end} />}
     </div>
   )
 }

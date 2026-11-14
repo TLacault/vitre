@@ -1,11 +1,25 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Button, Glass, TabBar } from './ui'
-import { ArrowDown, ArrowUp, Clock3, Download, Droplet, Image as ImageIcon, LayoutGrid, Plus, RotateCcw, Search, Settings2, Sparkles, Trash2, Upload, X } from 'lucide-react'
+import { Button, Glass, Input, Switch, TabBar, useDismiss } from './ui'
+import ArrowDown from 'lucide-react/icons/arrow-down'
+import ArrowUp from 'lucide-react/icons/arrow-up'
+import Clock3 from 'lucide-react/icons/clock-3'
+import Download from 'lucide-react/icons/download'
+import Droplet from 'lucide-react/icons/droplet'
+import ImageIcon from 'lucide-react/icons/image'
+import LayoutGrid from 'lucide-react/icons/layout-grid'
+import Plus from 'lucide-react/icons/plus'
+import RotateCcw from 'lucide-react/icons/rotate-ccw'
+import Search from 'lucide-react/icons/search'
+import Settings2 from 'lucide-react/icons/settings-2'
+import Sparkles from 'lucide-react/icons/sparkles'
+import Trash2 from 'lucide-react/icons/trash-2'
+import Upload from 'lucide-react/icons/upload'
+import X from 'lucide-react/icons/x'
 import { add, remove, usePics, type Pic } from './gallery'
-import { defaults, engines, merge, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
+import { defaults, engines, merge, palettes, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
 import { Reveal } from './Reveal'
 import { Choice, Color, Drop, Range, Row, Text, Toggle } from './controls'
-import { favicon, icons } from './icons'
+import { favicon, icons, loadLibrary, searchIcons, TileGlyph } from './icons'
 
 export const replay = () => dispatchEvent(new Event('vitre:replay'))
 
@@ -24,7 +38,7 @@ function Thumb({ pic, active, onPick }: { pic: Pic; active: boolean; onPick: () 
   )
 }
 
-function Backdrop({ s }: { s: Settings }) {
+function BackgroundTab({ s }: { s: Settings }) {
   const pics = usePics()
   const b = s.bg, sh = s.shader
   return (
@@ -45,7 +59,14 @@ function Backdrop({ s }: { s: Settings }) {
       ) : (
         <>
           <Row label="Colours">
-            <div className="swatches">{sh.colors.map((c, i) => <Color key={i} label={`Colour ${i + 1}`} value={c} onChange={v => set('shader.colors', sh.colors.map((x, j) => (j === i ? v : x)))} />)}</div>
+            <div className="palettes">
+              {Object.entries(palettes).map(([k, p]) => (
+                <button type="button" key={k} className="palette" aria-pressed={sh.palette === k} onClick={() => set('shader.palette', k)}>
+                  <i style={{ background: `linear-gradient(135deg, ${p.colors[0]}, ${p.colors[2]} 45%, ${p.colors[4]})` }} />
+                  <span>{p.label}</span>
+                </button>
+              ))}
+            </div>
           </Row>
           <Range label="Motion" path="shader.motion" value={sh.motion} min={0} max={2} />
           <Range label="Vibrance" path="shader.vibrance" value={sh.vibrance} min={0} max={2} />
@@ -89,7 +110,12 @@ function ClockTab({ s }: { s: Settings }) {
       <Toggle label="Seconds" path="clock.seconds" value={c.seconds} />
       <Toggle label="Date" path="clock.date" value={c.date} />
       <Range label="Size" path="clock.size" value={c.size} min={0.4} max={1.6} fmt={v => `${Math.round(v * 100)}%`} />
-      <Toggle label="On glass" path="clock.glass" value={c.glass} />
+      <Range label="Weight" path="clock.weight" value={c.weight} min={100} max={900} step={10} fmt={v => String(Math.round(v))} />
+      <div className="row row-inline">
+        <span className="row-label">Glass digits</span>
+        {/* hairline digits hold no glass: switching it on thickens them unless already bold enough */}
+        <Switch aria-label="Glass digits" checked={c.glass} onCheckedChange={v => save({ ...s, clock: { ...c, glass: v, weight: v && c.weight < 500 ? 640 : c.weight } })} />
+      </div>
       <h3 className="section">Welcome</h3>
       <Toggle label="Show welcome line" path="welcome.show" value={s.welcome.show} />
       <Text label="Text ({greeting} becomes Good morning, afternoon…)" path="welcome.text" value={s.welcome.text} />
@@ -121,26 +147,35 @@ function SearchTab({ s }: { s: Settings }) {
 
 function IconPick({ tile, onPick }: { tile: Tile; onPick: (icon: string) => void }) {
   const [open, setOpen] = useState(false)
-  const root = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    const out = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
-    document.addEventListener('pointerdown', out)
-    return () => document.removeEventListener('pointerdown', out)
-  }, [open])
-  const Icon = icons[tile.icon]
+  const [q, setQ] = useState('')
+  const [lib, setLib] = useState<Awaited<ReturnType<typeof loadLibrary>>>()
+  const root = useDismiss(open, () => setOpen(false))
+  useEffect(() => { if (open && q && !lib) loadLibrary().then(setLib) }, [open, q])
+  const pick = (icon: string) => { onPick(icon); setOpen(false); setQ('') }
+  const found = q && lib ? searchIcons(lib, q) : []
   return (
     <div className="icon-pick" ref={root}>
       <button type="button" className="icon-btn" aria-label="Choose icon" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {Icon ? <Icon size={18} /> : tile.icon === 'favicon' ? <img src={favicon(tile.url)} alt="" /> : <b>{tile.name[0]?.toUpperCase()}</b>}
+        {tile.icon === 'favicon' ? <img src={favicon(tile.url)} alt="" /> : tile.icon === 'letter' ? <b>{tile.name[0]?.toUpperCase()}</b> : <TileGlyph name={tile.icon} size={18} />}
       </button>
       {open && (
         <Glass className="icon-pop">
-          <button type="button" onClick={() => (onPick('favicon'), setOpen(false))} data-active={tile.icon === 'favicon' || undefined}>Site</button>
-          <button type="button" onClick={() => (onPick('letter'), setOpen(false))} data-active={tile.icon === 'letter' || undefined}>Aa</button>
-          {Object.entries(icons).map(([k, I]) => (
-            <button type="button" key={k} aria-label={k} data-active={tile.icon === k || undefined} onClick={() => (onPick(k), setOpen(false))}><I size={17} /></button>
-          ))}
+          <Input autoFocus aria-label="Search icons" placeholder="Search 1,600 icons" value={q} onValueChange={setQ} />
+          <div className="icon-grid">
+            {!q && <>
+              <button type="button" onClick={() => pick('favicon')} data-active={tile.icon === 'favicon' || undefined}>Site</button>
+              <button type="button" onClick={() => pick('letter')} data-active={tile.icon === 'letter' || undefined}>Aa</button>
+              {Object.entries(icons).map(([k, I]) => (
+                <button type="button" key={k} aria-label={k} title={k} data-active={tile.icon === k || undefined} onClick={() => pick(k)}><I size={17} /></button>
+              ))}
+            </>}
+            {q && !lib && <p className="icon-empty">Loading icons…</p>}
+            {q && lib && !found.length && <p className="icon-empty">No icon matches “{q}”.</p>}
+            {found.map(n => {
+              const I = lib![n]!
+              return <button type="button" key={n} aria-label={n} title={n} data-active={tile.icon === `lucide:${n}` || undefined} onClick={() => pick(`lucide:${n}`)}><I size={17} /></button>
+            })}
+          </div>
         </Glass>
       )}
     </div>
@@ -232,6 +267,7 @@ function MotionTab({ s }: { s: Settings }) {
         </div>
       </Row>
       <Range label="Duration" path="motion.duration" value={m.duration} min={200} max={2000} step={50} unit="ms" />
+      <Range label="Wait" path="motion.wait" value={m.wait} min={0} max={2000} step={50} unit="ms" />
       <Range label="Stagger" path="motion.stagger" value={m.stagger} min={0} max={250} step={5} unit="ms" />
       <Button icon={<RotateCcw size={16} />} onClick={replay}>Replay on the page</Button>
     </>
@@ -265,7 +301,7 @@ function Footer({ s }: { s: Settings }) {
 function alertless(msg: string) { document.querySelector('.panel-status')!.textContent = msg }
 
 const tabs = [
-  { value: 'bg', label: 'Backdrop', icon: <ImageIcon size={16} />, C: Backdrop },
+  { value: 'bg', label: 'Background', icon: <ImageIcon size={16} />, C: BackgroundTab },
   { value: 'look', label: 'Glass', icon: <Droplet size={16} />, C: Look },
   { value: 'clock', label: 'Text', icon: <Clock3 size={16} />, C: ClockTab },
   { value: 'search', label: 'Search', icon: <Search size={16} />, C: SearchTab },

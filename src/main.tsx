@@ -5,6 +5,7 @@ import '@fontsource-variable/geist-mono'
 import '@fontsource/instrument-serif'
 import './styles.css'
 import { load, useSettings } from './settings'
+import { ready as galleryReady } from './gallery'
 import { Background } from './Background'
 import { Home } from './Home'
 import { SettingsMenu } from './Settings'
@@ -35,6 +36,7 @@ function App() {
       '--display': fonts[s.font],
       '--dur': `${s.motion.duration}ms`,
       '--stagger': `${s.motion.stagger}ms`,
+      '--wait': `${s.motion.wait}ms`,
     }
     for (const [k, val] of Object.entries(v)) r.style.setProperty(k, String(val))
   }, [s])
@@ -47,4 +49,5 @@ function App() {
   )
 }
 
-load().then(() => createRoot(document.getElementById('root')!).render(<App />))
+// Settings and the gallery both first: rendering before the gallery is read would show the shader, then swap.
+Promise.all([load(), galleryReady]).then(() => createRoot(document.getElementById('root')!).render(<App />))

@@ -24,7 +24,7 @@ export const defaults = {
     revealMs: 1400,
   },
   shader: {
-    colors: ['#04070d', '#0c2a44', '#5b3cc4', '#0a4f6b', '#d98ab0'],
+    palette: 'dusk',
     motion: 0.25,
     vibrance: 1,
     light: 1,
@@ -32,7 +32,7 @@ export const defaults = {
     swirl: 0.3,
   },
   glass: { frost: 18, tint: 0.22, saturate: 1.6, rim: 0.16, radius: 22 },
-  clock: { show: true, h24: true, seconds: false, date: true, size: 1, glass: false },
+  clock: { show: true, h24: true, seconds: false, date: true, size: 1, weight: 200, glass: false },
   welcome: { show: true, text: '{greeting}.', glass: false },
   search: { show: true, engine: 'brave', custom: 'https://example.com/?q=%s', placeholder: 'Search the web', width: 560, autofocus: true, newTab: false },
   tiles: {
@@ -48,10 +48,23 @@ export const defaults = {
       { id: 'cl', name: 'Claude', url: 'https://claude.ai', icon: 'favicon' },
     ] as Tile[],
   },
-  motion: { entrance: 'rise' as Entrance, duration: 700, stagger: 60 },
+  motion: { entrance: 'rise' as Entrance, duration: 700, stagger: 60, wait: 150 },
   layout: { offset: 0.38 }, // vertical position of the stack, share of the viewport
 }
 export type Settings = typeof defaults
+
+/** Shader colour profiles: a dark base, two mids and two lights, as the mesh gradient wants them. */
+export const palettes: Record<string, { label: string; colors: string[] }> = {
+  dusk: { label: 'Dusk', colors: ['#04070d', '#0c2a44', '#5b3cc4', '#0a4f6b', '#d98ab0'] },
+  grid: { label: 'Grid', colors: ['#02050a', '#06111c', '#1a3cff', '#0b2034', '#5fe1ff'] },
+  aurora: { label: 'Aurora', colors: ['#020a0c', '#06302f', '#1fa58a', '#2b5fd9', '#9be7c4'] },
+  ocean: { label: 'Ocean', colors: ['#01060f', '#06224a', '#0e6ba8', '#0a3d62', '#7dd3fc'] },
+  ember: { label: 'Ember', colors: ['#0d0503', '#3a0d06', '#c2410c', '#7c1d3f', '#f5a25d'] },
+  sunrise: { label: 'Sunrise', colors: ['#120814', '#4a1d4f', '#f2994a', '#b8336a', '#ffe29a'] },
+  rose: { label: 'Rose', colors: ['#0c0508', '#3b0f24', '#c2417a', '#5a1e5e', '#ffc2d6'] },
+  forest: { label: 'Forest', colors: ['#030904', '#0f2a17', '#3f7d4e', '#1d4732', '#c8d98a'] },
+  mono: { label: 'Mono', colors: ['#050505', '#1a1a1a', '#4a4a4a', '#262626', '#a0a0a0'] },
+}
 
 export const engines: Record<string, { label: string; url: string }> = {
   brave: { label: 'Brave', url: 'https://search.brave.com/search?q=%s' },

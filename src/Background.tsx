@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ShaderFitOptions, ShaderMount, getShaderColorFromString, meshGradientFragmentShader } from '@paper-design/shaders'
 import { pick, usePics } from './gallery'
 import { Reveal } from './Reveal'
-import { useSettings } from './settings'
+import { palettes, useSettings } from './settings'
 
 /** Saturation and lightness scaled in HSL (the Grid's ShaderFloor tuning). */
 export function tune(hex: string, sat: number, light: number) {
@@ -16,11 +16,25 @@ export function tune(hex: string, sat: number, light: number) {
   return `#${[R, G, B].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('')}`
 }
 
-function Shader() {
+// The tone the next tab paints before anything loads (public/boot.js): this background, darkened.
+const remember = (rgb: number[]) => {
+  try { localStorage.setItem('vitre.cover', `rgb(${rgb.map(v => Math.round(v * 0.45)).join(' ')})`) } catch {}
+}
+const mix = (hex: string[]) => [1, 3, 5].map(i => hex.reduce((a, h) => a + parseInt(h.slice(i, i + 2), 16), 0) / hex.length)
+function average(img: HTMLImageElement) {
+  const c = document.createElement('canvas')
+  c.width = c.height = 1
+  const x = c.getContext('2d')!
+  x.drawImage(img, 0, 0, 1, 1)
+  return [...x.getImageData(0, 0, 1, 1).data.slice(0, 3)]
+}
+
+function Shader({ onReady }: { onReady: () => void }) {
   const sh = useSettings().shader
   const el = useRef<HTMLDivElement>(null)
   const mount = useRef<ShaderMount>(undefined)
-  const colors = sh.colors.map(c => getShaderColorFromString(tune(c, sh.vibrance, sh.light)))
+  const hex = (palettes[sh.palette] ?? palettes.dusk!).colors.map(c => tune(c, sh.vibrance, sh.light))
+  const colors = hex.map(c => getShaderColorFromString(c))
   const speed = () => (matchMedia('(prefers-reduced-motion: reduce)').matches || document.hidden ? 0 : sh.motion)
 
   useEffect(() => {
@@ -30,6 +44,7 @@ function Shader() {
       u_fit: ShaderFitOptions.cover, u_scale: 1, u_rotation: 0, u_originX: 0.5, u_originY: 0.5,
       u_offsetX: 0, u_offsetY: 0, u_worldWidth: 0, u_worldHeight: 0,
     }, undefined, speed(), Math.random() * 1e4, 1, 1600 * 900) // random frame: each tab opens on a different moment
+    requestAnimationFrame(() => { onReady(); remember(mix(hex)) })
     return () => mount.current?.dispose()
   }, [])
   useEffect(() => {
@@ -42,7 +57,7 @@ function Shader() {
   return <div ref={el} className="layer" />
 }
 
-function Photo() {
+function Photo({ onReady }: { onReady: () => void }) {
   const s = useSettings().bg
   const pics = usePics()
   const [url, setUrl] = useState<string>()
@@ -53,13 +68,18 @@ function Photo() {
     return () => { if (u) URL.revokeObjectURL(u) }
   }, [s.rotate, s.fixedId, pics.length])
   if (!url) return null
-  return <img key={url} className="layer photo" src={url} alt="" />
+  return <img key={url} className="layer photo" src={url} alt="" onLoad={e => {
+    const img = e.currentTarget
+    img.decode().catch(() => {}).then(() => { onReady(); remember(average(img)) })
+  }} />
 }
 
 export function Background() {
   const s = useSettings().bg
   const empty = !usePics().length // an empty gallery falls back to the shader
   const [run, setRun] = useState(0)
+  const [ready, setReady] = useState(false)
+  const onReady = () => setReady(true)
   useEffect(() => {
     const again = () => setRun(r => r + 1)
     addEventListener('vitre:replay', again)
@@ -67,9 +87,9 @@ export function Background() {
   }, [])
   return (
     <div className="bg" aria-hidden="true">
-      <Reveal key={run} kind={s.reveal} ms={s.revealMs}>
+      <Reveal run={run} ready={ready} kind={s.reveal} ms={s.revealMs}>
         <div className="layer" style={{ filter: s.blur ? `blur(${s.blur}px)` : undefined, inset: s.blur ? -s.blur * 2 : 0 }}>
-          {s.kind === 'image' && !empty ? <Photo /> : <Shader />}
+          {s.kind === 'image' && !empty ? <Photo onReady={onReady} /> : <Shader onReady={onReady} />}
         </div>
         <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
         {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity }} />}

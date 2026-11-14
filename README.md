@@ -2,12 +2,12 @@
 
 A new tab page made of frosted glass, for Brave, Chrome and Firefox.
 
-- **Backdrop:** your own images, cached in the browser, changing on every tab, every N hours, or never, or a living mesh-gradient shader with your colours, motion, vibrance and luminosity. Optional grain, blur and dim on both, and a reveal as it arrives: iris, grid, plasma, zoom out, wipe, blinds or fade.
+- **Backdrop:** your own images, cached in the browser, changing on every tab, every N hours, or never, or a living mesh-gradient shader in one of nine colour profiles, with motion, vibrance and luminosity. Optional grain, blur and dim on both, and a reveal as it arrives: iris, grid, plasma, zoom out, wipe, blinds or fade.
 - **Glass:** every surface is frosted glass in plain CSS (backdrop blur, tint, a lit rim), with frost, saturation, tint, rim light and roundness all adjustable. Nothing is measured or filtered per frame, so it stays light.
 - **Search** with Brave, Google, DuckDuckGo, Kagi, Startpage, or any URL with `%s`.
-- **Favorite tabs** as glass buttons wearing the site's icon, a letter or one of 35 icons, with labels on or off.
-- **Clock and welcome line**, each optionally on glass. `{greeting}` in the welcome text becomes Good morning / afternoon / evening.
-- **Entrances:** pick how the page arrives from a live preview gallery (fade, rise, focus, bloom, drop, unfold), with its duration and stagger.
+- **Favorite tabs** as glass buttons wearing the site's icon, a letter, or any of Lucide's ~1,600 icons (searchable), with labels on or off.
+- **Clock** with weight and size, optionally in glass digits (the time cut out of frosted glass). **Welcome line**, optionally on glass. `{greeting}` in the welcome text becomes Good morning / afternoon / evening.
+- **Entrances:** pick how the page arrives from a live preview gallery (fade, rise, focus, bloom, drop, unfold), with a wait before it starts, its duration and stagger. A new tab opens on the last background's tone and holds the reveal until the background is ready, so there is no black flash.
 - Settings live in the glass panel at the bottom right. They can be exported and imported as JSON.
 
 ## Install
