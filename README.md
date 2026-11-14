@@ -1,11 +1,12 @@
 # Vitre
 
-A new tab page made of liquid glass, for Brave, Chrome and Firefox.
+A new tab page made of frosted glass, for Brave, Chrome and Firefox.
 
-- **Backdrop:** your own images, cached in the browser, changing on every tab, every N hours, or never, or a living mesh-gradient shader with your colours, motion, vibrance and luminosity. Optional grain, blur and dim on both.
-- **Glass:** every surface is [Glisse](https://glisse.kelvinzhang.ca/) liquid glass, with bend, dispersion, frost, tint, rim light and roundness all adjustable.
+- **Backdrop:** your own images, cached in the browser, changing on every tab, every N hours, or never, or a living mesh-gradient shader with your colours, motion, vibrance and luminosity. Optional grain, blur and dim on both, and a reveal as it arrives: iris, grid, plasma, zoom out, wipe, blinds or fade.
+- **Glass:** every surface is frosted glass in plain CSS (backdrop blur, tint, a lit rim), with frost, saturation, tint, rim light and roundness all adjustable. Nothing is measured or filtered per frame, so it stays light.
 - **Search** with Brave, Google, DuckDuckGo, Kagi, Startpage, or any URL with `%s`.
 - **Favorite tabs** as glass buttons wearing the site's icon, a letter or one of 35 icons, with labels on or off.
+- **Clock and welcome line**, each optionally on glass. `{greeting}` in the welcome text becomes Good morning / afternoon / evening.
 - **Entrances:** pick how the page arrives from a live preview gallery (fade, rise, focus, bloom, drop, unfold), with its duration and stagger.
 - Settings live in the glass panel at the bottom right. They can be exported and imported as JSON.
 
@@ -24,7 +25,6 @@ pnpm build          # → dist/
 
 ## Notes
 
-- The glass bends what is behind it in Chromium browsers (Brave, Chrome, Edge). Firefox can't apply SVG filters to a live backdrop, so there the glass keeps its frost and lit rim without the bend.
 - Site icons come from Google's favicon service. Pick an icon or a letter for a tile to keep its domain to yourself.
 
 MIT

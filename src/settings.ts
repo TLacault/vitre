@@ -5,6 +5,7 @@ import { useSyncExternalStore } from 'react'
 
 export type Tile = { id: string; name: string; url: string; icon: string } // icon: 'favicon' | 'letter' | lucide name
 export type Entrance = 'none' | 'fade' | 'rise' | 'blur' | 'scale' | 'drop' | 'unfold'
+export type Reveal = 'none' | 'fade' | 'iris' | 'grid' | 'zoom' | 'plasma' | 'wipe' | 'blinds'
 
 export const defaults = {
   theme: 'dark' as 'auto' | 'light' | 'dark',
@@ -19,6 +20,8 @@ export const defaults = {
     dim: 0.15,
     grain: true,
     grainOpacity: 0.12,
+    reveal: 'iris' as Reveal,
+    revealMs: 1400,
   },
   shader: {
     colors: ['#04070d', '#0c2a44', '#5b3cc4', '#0a4f6b', '#d98ab0'],
@@ -28,8 +31,9 @@ export const defaults = {
     distortion: 0.8,
     swirl: 0.3,
   },
-  glass: { bend: 0.45, dispersion: 0.4, frost: 6, rim: 0.13, tint: 0.35, radius: 22 },
-  clock: { show: true, h24: true, seconds: false, date: true, size: 1 },
+  glass: { frost: 18, tint: 0.22, saturate: 1.6, rim: 0.16, radius: 22 },
+  clock: { show: true, h24: true, seconds: false, date: true, size: 1, glass: false },
+  welcome: { show: true, text: '{greeting}.', glass: false },
   search: { show: true, engine: 'brave', custom: 'https://example.com/?q=%s', placeholder: 'Search the web', width: 560, autofocus: true, newTab: false },
   tiles: {
     show: true,

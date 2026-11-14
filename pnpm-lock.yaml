@@ -20,9 +20,6 @@ importers:
       '@paper-design/shaders':
         specifier: ^0.0.82
         version: 0.0.82
-      glisse:
-        specifier: ^0.6.0
-        version: 0.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lucide-react:
         specifier: ^1.73.0
         version: 1.73.0(@types/react@18.3.31)(react@18.3.1)
@@ -365,12 +362,6 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
-
-  glisse@0.6.0:
-    resolution: {integrity: sha512-zTfA9s6JMYyftXy4gRBL6+36Rr+6sUeVhlwYv3lc3jZoSNEFSBIKpPPpqgIpBAecMMbhtBcnlVayfM2BYSDOOQ==}
-    peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -740,11 +731,6 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
-
-  glisse@0.6.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
 
   js-tokens@4.0.0: {}
 

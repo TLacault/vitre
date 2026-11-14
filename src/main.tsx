@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/geist-mono'
 import '@fontsource/instrument-serif'
-import 'glisse/styles.css'
 import './styles.css'
 import { load, useSettings } from './settings'
 import { Background } from './Background'
@@ -27,14 +26,11 @@ function App() {
     r.dataset.entrance = s.motion.entrance
     r.dataset.font = s.font
     const v = {
-      '--lg-fill': s.accent,
-      '--lg-on': s.accent,
       '--accent': s.accent,
-      '--lg-glass': dark ? `rgb(30 30 34 / ${s.glass.tint})` : `rgb(255 255 255 / ${s.glass.tint})`,
-      '--lg-blur': `${s.glass.frost}px`,
-      '--lg-glass-bend': s.glass.bend,
-      '--lg-glass-dispersion': s.glass.dispersion,
-      '--lg-rim-shine': s.glass.rim,
+      '--tint': s.glass.tint,
+      '--frost': `${s.glass.frost}px`,
+      '--sat': s.glass.saturate,
+      '--rim': s.glass.rim,
       '--radius': `${s.glass.radius}px`,
       '--display': fonts[s.font],
       '--dur': `${s.motion.duration}ms`,

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Glass, Menu } from 'glisse'
+import { Glass, Menu } from './ui'
 import { Check, Search } from 'lucide-react'
 import { engines, set, useSettings, type Tile } from './settings'
 import { favicon, icons } from './icons'
@@ -15,7 +15,7 @@ function Clock({ i }: { i: number }) {
   }, [])
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: c.seconds ? '2-digit' : undefined, hour12: !c.h24 })
   return (
-    <div className="clock enter" style={{ ...at(i), fontSize: `calc(clamp(4rem, 11vw, 8.5rem) * ${c.size})` }}>
+    <div className={`clock enter${c.glass ? ' glass clock-glass' : ''}`} style={{ ...at(i), fontSize: `calc(clamp(4rem, 11vw, 8.5rem) * ${c.size})` }}>
       <time>{time}</time>
       {c.date && <p>{now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}</p>}
     </div>
@@ -81,6 +81,17 @@ function Tiles({ i }: { i: number }) {
   )
 }
 
+const greeting = (h: number) => (h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening')
+
+function Welcome({ i }: { i: number }) {
+  const w = useSettings().welcome
+  return (
+    <p className={`welcome enter${w.glass ? ' glass' : ''}`} style={at(i)}>
+      {w.text.replaceAll('{greeting}', greeting(new Date().getHours()))}
+    </p>
+  )
+}
+
 export function Home() {
   const s = useSettings()
   let i = 0
@@ -89,6 +100,7 @@ export function Home() {
       {s.clock.show && <Clock i={i++} />}
       {s.search.show && <SearchBar i={i++} />}
       {s.tiles.show && <Tiles i={i} />}
+      {s.welcome.show && s.welcome.text.trim() && <Welcome i={i + (s.tiles.show ? s.tiles.list.length : 0)} />}
     </main>
   )
 }

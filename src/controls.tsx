@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { Glass, Input, SegmentedControl, Slider, Switch } from 'glisse'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Glass, Input, SegmentedControl, Slider, Switch } from './ui'
 import { set } from './settings'
 
-// Settings rows built on glisse: every control is glass, none is a browser default.
+// Settings rows: every control is the page's own (ui.tsx), none is a browser default.
 
 export function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
@@ -35,7 +35,7 @@ export function Range({ label, path, value, min, max, step = 0.01, unit = '', fm
 export function Choice<T extends string>({ label, path, value, items }: { label: string; path: string; value: T; items: [T, string][] }) {
   return (
     <Row label={label}>
-      <SegmentedControl aria-label={label} style={{ '--n': items.length } as CSSProperties} items={items.map(([value, label]) => ({ value, label }))} value={value} onValueChange={v => set(path, v)} />
+      <SegmentedControl aria-label={label} items={items.map(([value, label]) => ({ value, label }))} value={value} onValueChange={v => set(path, v)} />
     </Row>
   )
 }

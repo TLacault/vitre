@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ShaderFitOptions, ShaderMount, getShaderColorFromString, meshGradientFragmentShader } from '@paper-design/shaders'
 import { pick, usePics } from './gallery'
+import { Reveal } from './Reveal'
 import { useSettings } from './settings'
 
 /** Saturation and lightness scaled in HSL (the Grid's ShaderFloor tuning). */
@@ -58,13 +59,21 @@ function Photo() {
 export function Background() {
   const s = useSettings().bg
   const empty = !usePics().length // an empty gallery falls back to the shader
+  const [run, setRun] = useState(0)
+  useEffect(() => {
+    const again = () => setRun(r => r + 1)
+    addEventListener('vitre:replay', again)
+    return () => removeEventListener('vitre:replay', again)
+  }, [])
   return (
     <div className="bg" aria-hidden="true">
-      <div className="layer" style={{ filter: s.blur ? `blur(${s.blur}px)` : undefined, inset: s.blur ? -s.blur * 2 : 0 }}>
-        {s.kind === 'image' && !empty ? <Photo /> : <Shader />}
-      </div>
-      <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
-      {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity }} />}
+      <Reveal key={run} kind={s.reveal} ms={s.revealMs}>
+        <div className="layer" style={{ filter: s.blur ? `blur(${s.blur}px)` : undefined, inset: s.blur ? -s.blur * 2 : 0 }}>
+          {s.kind === 'image' && !empty ? <Photo /> : <Shader />}
+        </div>
+        <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
+        {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity }} />}
+      </Reveal>
     </div>
   )
 }

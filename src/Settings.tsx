@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Button, Glass, TabBar } from 'glisse'
+import { Button, Glass, TabBar } from './ui'
 import { ArrowDown, ArrowUp, Clock3, Download, Droplet, Image as ImageIcon, LayoutGrid, Plus, RotateCcw, Search, Settings2, Sparkles, Trash2, Upload, X } from 'lucide-react'
 import { add, remove, usePics, type Pic } from './gallery'
-import { defaults, engines, merge, save, set, useSettings, type Entrance, type Settings, type Tile } from './settings'
+import { defaults, engines, merge, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
+import { Reveal } from './Reveal'
 import { Choice, Color, Drop, Range, Row, Text, Toggle } from './controls'
 import { favicon, icons } from './icons'
 
@@ -55,6 +56,7 @@ function Backdrop({ s }: { s: Settings }) {
       )}
       <Range label="Blur" path="bg.blur" value={b.blur} min={0} max={40} step={1} unit="px" />
       <Range label="Dim" path="bg.dim" value={b.dim} min={0} max={0.8} fmt={v => `${Math.round(v * 100)}%`} />
+      <Reveals s={s} />
       <Toggle label="Grain" path="bg.grain" value={b.grain} />
       {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={0.5} fmt={v => `${Math.round(v * 100)}%`} />}
     </>
@@ -68,9 +70,8 @@ function Look({ s }: { s: Settings }) {
       <Choice label="Theme" path="theme" value={s.theme} items={[['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']]} />
       <Row label="Accent"><Color label="Accent" value={s.accent} onChange={v => set('accent', v)} /></Row>
       <Choice label="Typeface" path="font" value={s.font} items={[['geist', 'Sans'], ['serif', 'Serif'], ['mono', 'Mono']]} />
-      <Range label="Bend" path="glass.bend" value={g.bend} min={0} max={1.5} />
-      <Range label="Dispersion" path="glass.dispersion" value={g.dispersion} min={0} max={1} />
-      <Range label="Frost" path="glass.frost" value={g.frost} min={0} max={30} step={1} unit="px" />
+      <Range label="Frost" path="glass.frost" value={g.frost} min={0} max={40} step={1} unit="px" />
+      <Range label="Saturation" path="glass.saturate" value={g.saturate} min={0.5} max={2.5} />
       <Range label="Tint" path="glass.tint" value={g.tint} min={0} max={0.9} fmt={v => `${Math.round(v * 100)}%`} />
       <Range label="Rim light" path="glass.rim" value={g.rim} min={0} max={1} />
       <Range label="Roundness" path="glass.radius" value={g.radius} min={0} max={40} step={1} unit="px" />
@@ -88,6 +89,11 @@ function ClockTab({ s }: { s: Settings }) {
       <Toggle label="Seconds" path="clock.seconds" value={c.seconds} />
       <Toggle label="Date" path="clock.date" value={c.date} />
       <Range label="Size" path="clock.size" value={c.size} min={0.4} max={1.6} fmt={v => `${Math.round(v * 100)}%`} />
+      <Toggle label="On glass" path="clock.glass" value={c.glass} />
+      <h3 className="section">Welcome</h3>
+      <Toggle label="Show welcome line" path="welcome.show" value={s.welcome.show} />
+      <Text label="Text ({greeting} becomes Good morning, afternoon…)" path="welcome.text" value={s.welcome.text} />
+      <Toggle label="On glass" path="welcome.glass" value={s.welcome.glass} />
     </>
   )
 }
@@ -182,6 +188,28 @@ function TilesTab({ s }: { s: Settings }) {
 
 const entrances: [Entrance, string][] = [['fade', 'Fade'], ['rise', 'Rise'], ['blur', 'Focus'], ['scale', 'Bloom'], ['drop', 'Drop'], ['unfold', 'Unfold'], ['none', 'None']]
 
+const reveals: [RevealKind, string][] = [['iris', 'Iris'], ['grid', 'Grid'], ['plasma', 'Plasma'], ['zoom', 'Zoom out'], ['wipe', 'Wipe'], ['blinds', 'Blinds'], ['fade', 'Fade'], ['none', 'None']]
+
+function Reveals({ s }: { s: Settings }) {
+  const [play, setPlay] = useState<Record<string, number>>({})
+  return (
+    <>
+      <Row label="Reveal">
+        <div className="entrances">
+          {reveals.map(([k, label]) => (
+            <button type="button" key={k} className="entrance" aria-pressed={s.bg.reveal === k}
+              onPointerEnter={() => setPlay(p => ({ ...p, [k]: (p[k] ?? 0) + 1 }))} onClick={() => { set('bg.reveal', k); replay() }}>
+              <div className="mini mini-bg"><Reveal key={play[k] ?? 0} kind={k} ms={Math.min(s.bg.revealMs, 1200)} /></div>
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      </Row>
+      <Range label="Reveal duration" path="bg.revealMs" value={s.bg.revealMs} min={300} max={4000} step={50} unit="ms" />
+    </>
+  )
+}
+
 function MotionTab({ s }: { s: Settings }) {
   const m = s.motion
   const [play, setPlay] = useState<Record<string, number>>({})
@@ -237,12 +265,12 @@ function Footer({ s }: { s: Settings }) {
 function alertless(msg: string) { document.querySelector('.panel-status')!.textContent = msg }
 
 const tabs = [
-  { value: 'bg', label: 'Backdrop', icon: <ImageIcon size={20} />, C: Backdrop },
-  { value: 'look', label: 'Glass', icon: <Droplet size={20} />, C: Look },
-  { value: 'clock', label: 'Clock', icon: <Clock3 size={20} />, C: ClockTab },
-  { value: 'search', label: 'Search', icon: <Search size={20} />, C: SearchTab },
-  { value: 'tiles', label: 'Tabs', icon: <LayoutGrid size={20} />, C: TilesTab },
-  { value: 'motion', label: 'Motion', icon: <Sparkles size={20} />, C: MotionTab },
+  { value: 'bg', label: 'Backdrop', icon: <ImageIcon size={16} />, C: Backdrop },
+  { value: 'look', label: 'Glass', icon: <Droplet size={16} />, C: Look },
+  { value: 'clock', label: 'Text', icon: <Clock3 size={16} />, C: ClockTab },
+  { value: 'search', label: 'Search', icon: <Search size={16} />, C: SearchTab },
+  { value: 'tiles', label: 'Tabs', icon: <LayoutGrid size={16} />, C: TilesTab },
+  { value: 'motion', label: 'Motion', icon: <Sparkles size={16} />, C: MotionTab },
 ]
 
 export function SettingsMenu() {
