@@ -412,7 +412,7 @@ button { font: inherit; color: inherit; }
 .hue i { top: 50%; }
 .color-pop .input { font-family: 'Geist Mono Variable', monospace; font-size: 13px; text-transform: lowercase; }
 
-.panel-tabs { width: min(400px, calc(100vw - 32px)); min-height: min(460px, calc(100svh - 100px)); }
+.panel-tabs { width: min(400px, calc(100vw - 32px)); }
 .editor-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 10px 12px; border-bottom: 1px solid var(--line); }
 .editor-head h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .editor-head h2 span { margin-left: 6px; font: 500 12px/1 'Geist Mono Variable', monospace; color: var(--soft); }
@@ -436,7 +436,9 @@ button { font: inherit; color: inherit; }
   all: unset; flex: none; display: grid; place-items: center; width: 24px; height: 36px; border-radius: 8px;
   color: var(--soft); transition: color 0.2s, background-color 0.2s;
 }
-.grip { cursor: grab; opacity: 0.55; }
+.grip { cursor: grab; opacity: 0.55; touch-action: none; }
+.tile-list[data-dragging] { cursor: grabbing; user-select: none; }
+.tile-list[data-dragging] .tile-row:not([data-drag]) { transition: transform 0.25s var(--ease); }
 .grip:active { cursor: grabbing; }
 .tile-row:hover .grip, .grip:focus-visible { opacity: 1; }
 .row-x { width: 32px; height: 32px; cursor: pointer; opacity: 0; }

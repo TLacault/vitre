@@ -2,3 +2,4 @@ node_modules
 dist
 *.zip
 public/brands.json
+store/raw

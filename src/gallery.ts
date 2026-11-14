@@ -27,7 +27,19 @@ async function refresh() {
   pics = (await tx<Pic[]>('readonly', s => s.getAll())).sort((a, b) => a.added - b.added)
   listeners.forEach(l => l())
 }
-export const ready = refresh()
+// First run: the bundled wallpaper joins the gallery as 'default' (the default settings show it). Seeded once;
+// a user who deletes it does not get it back.
+async function seed() {
+  if (await kv('vitre.seeded')) return
+  if (await tx<number>('readonly', s => s.count())) return void (await kv('vitre.seeded', true)) // an existing gallery stays as it is
+  try {
+    const full = await (await fetch('./wallpapers/default.webp')).blob()
+    const pic: Pic = { id: 'default', full, thumb: await shrink(full, 360), added: 0 }
+    await tx('readwrite', s => s.put(pic))
+  } catch {} // no bundled file (or no network in dev): the shader shows instead
+  await kv('vitre.seeded', true)
+}
+export const ready = seed().then(refresh)
 export const usePics = () => useSyncExternalStore(l => (listeners.add(l), () => listeners.delete(l)), () => pics)
 
 async function shrink(file: Blob, max: number) {

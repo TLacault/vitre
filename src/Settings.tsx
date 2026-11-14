@@ -16,7 +16,7 @@ import Trash2 from 'lucide-react/icons/trash-2'
 import Upload from 'lucide-react/icons/upload'
 import X from 'lucide-react/icons/x'
 import { add, remove, usePics, type Pic } from './gallery'
-import { defaults, engines, merge, palettes, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
+import { defaults, engines, get, merge, palettes, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
 import { Reveal } from './Reveal'
 import { Choice, Color, Drop, Range, Row, Text, Toggle } from './controls'
 import { BrandGlyph, favicon, icons, loadBrands, loadLibrary, searchBrands, searchIcons, TileGlyph, type Brand } from './icons'
@@ -247,13 +247,26 @@ function TilesTab({ s }: { s: Settings }) {
 function TabsEditor({ s }: { s: Settings }) {
   const list = s.tiles.list
   const [drag, setDrag] = useState<number | null>(null)
+  const rows = useRef<HTMLDivElement>(null)
   const put = (l: Tile[]) => set('tiles.list', l)
   const edit = (i: number, patch: Partial<Tile>) => put(list.map((x, j) => (j === i ? { ...x, ...patch } : x)))
+  /** Moves a tab; reads the live list, since a drag fires faster than renders. */
   const move = (from: number, to: number) => {
-    if (to < 0 || to >= list.length || from === to) return
-    const l = [...list]
+    const l = [...get().tiles.list]
+    if (to < 0 || to >= l.length || from === to) return false
     l.splice(to, 0, l.splice(from, 1)[0]!)
     put(l)
+    return true
+  }
+  // Pointer-driven reorder (HTML drag and drop drops the drag when the dragged row moves in the DOM,
+  // and Firefox won't drag a button): the row under the pointer's y takes the dragged tab's place.
+  const dragging = useRef<number | null>(null)
+  const onGripMove = (e: React.PointerEvent) => {
+    const from = dragging.current
+    if (from === null) return
+    const els = [...rows.current!.querySelectorAll<HTMLElement>('.tile-row')]
+    const to = els.findIndex(el => { const r = el.getBoundingClientRect(); return e.clientY >= r.top && e.clientY < r.bottom })
+    if (to >= 0 && move(from, to)) { dragging.current = to; setDrag(to) }
   }
   const tidyUrl = (i: number, raw: string) => {
     const v = raw.trim()
@@ -271,16 +284,17 @@ function TabsEditor({ s }: { s: Settings }) {
     <>
       <header className="editor-head">
         <h2>Tabs <span>{list.length}</span></h2>
-        <Button variant="filled" icon={<Plus size={16} />} onClick={() => put([...list, { id: crypto.randomUUID(), name: 'New', url: '', icon: 'favicon' }])}>Add</Button>
+        <Button variant="filled" icon={<Plus size={16} />} onClick={() => put([...list, { id: crypto.randomUUID(), name: 'New', url: '', icon: 'globe' }])}>Add</Button>
       </header>
-      <div className="panel-body tile-list">
+      <div ref={rows} className="panel-body tile-list" data-dragging={drag !== null || undefined}>
         {!list.length && <p className="icon-empty">No tabs yet. Add one, give it an address, and it shows under the search bar.</p>}
         {list.map((tile, i) => (
-          <div className="tile-row" key={tile.id} data-drag={drag === i || undefined}
-            onDragOver={e => { e.preventDefault(); if (drag !== null && drag !== i) { move(drag, i); setDrag(i) } }}>
-            <button type="button" className="grip" aria-label={`Move ${tile.name}, use arrow keys`} draggable
-              onDragStart={e => { setDrag(i); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setDragImage(e.currentTarget.parentElement!, 20, 20) }}
-              onDragEnd={() => setDrag(null)}
+          <div className="tile-row" key={tile.id} data-drag={drag === i || undefined}>
+            <button type="button" className="grip" aria-label={`Move ${tile.name}, use arrow keys`}
+              onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); dragging.current = i; setDrag(i) }}
+              onPointerMove={onGripMove}
+              onPointerUp={() => { dragging.current = null; setDrag(null) }}
+              onPointerCancel={() => { dragging.current = null; setDrag(null) }}
               onKeyDown={e => { if (e.key === 'ArrowUp') { e.preventDefault(); move(i, i - 1) } if (e.key === 'ArrowDown') { e.preventDefault(); move(i, i + 1) } }}>
               <GripVertical size={15} />
             </button>

@@ -23,6 +23,10 @@ pnpm build          # → dist/
 
 `pnpm build` and `pnpm dev` first write `public/brands.json` from Simple Icons (`scripts/brands.mjs`). `pnpm dev` runs the page at `localhost:5173`, saving settings to localStorage instead of extension storage.
 
+## Store
+
+`pnpm zip` builds `vitre-chrome-<version>.zip` and `vitre-firefox-<version>.zip`. The Web Store listing text and images are in [`store/`](store/LISTING.md); `pnpm shots <dev url>` regenerates the images. Privacy: [PRIVACY.md](PRIVACY.md).
+
 ## Notes
 
 - Site icons come from Google's favicon service. Pick an icon or a letter for a tile to keep its domain to yourself.

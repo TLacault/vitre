@@ -1,10 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "Vitre",
-  "description": "A new tab made of frosted glass: your images or a living gradient, a search bar and your favorite tabs, all customizable.",
+  "name": "Vitre – Glass New Tab",
+  "short_name": "Vitre",
+  "description": "A new tab made of glass: your picture or a living gradient, a glass clock, search and your sites. Customise everything.",
   "version": "1.0.0",
-  "chrome_url_overrides": { "newtab": "index.html" },
-  "permissions": ["storage", "unlimitedStorage"],
-  "icons": { "16": "icon-16.png", "32": "icon-32.png", "48": "icon-48.png", "128": "icon-128.png" },
-  "browser_specific_settings": { "gecko": { "id": "vitre@timlacault.dev", "strict_min_version": "121.0" } }
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "vitre@timlacault.dev",
+      "strict_min_version": "121.0"
+    }
+  },
+  "homepage_url": "https://github.com/TLacault/vitre"
 }
