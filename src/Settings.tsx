@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Button, Glass, Input, Switch, TabBar, useDismiss } from './ui'
-import ArrowDown from 'lucide-react/icons/arrow-down'
-import ArrowUp from 'lucide-react/icons/arrow-up'
+import { createPortal } from 'react-dom'
+import { Button, Glass, Input, Switch, TabBar } from './ui'
+import GripVertical from 'lucide-react/icons/grip-vertical'
 import Clock3 from 'lucide-react/icons/clock-3'
 import Download from 'lucide-react/icons/download'
 import Droplet from 'lucide-react/icons/droplet'
@@ -19,7 +19,7 @@ import { add, remove, usePics, type Pic } from './gallery'
 import { defaults, engines, merge, palettes, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
 import { Reveal } from './Reveal'
 import { Choice, Color, Drop, Range, Row, Text, Toggle } from './controls'
-import { favicon, icons, loadLibrary, searchIcons, TileGlyph } from './icons'
+import { BrandGlyph, favicon, icons, loadBrands, loadLibrary, searchBrands, searchIcons, TileGlyph, type Brand } from './icons'
 
 export const replay = () => dispatchEvent(new Event('vitre:replay'))
 
@@ -145,38 +145,82 @@ function SearchTab({ s }: { s: Settings }) {
   )
 }
 
-function IconPick({ tile, onPick }: { tile: Tile; onPick: (icon: string) => void }) {
+function IconPick({ tile, onPick }: { tile: Tile; onPick: (icon: string, glyph?: Tile['glyph']) => void }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const [lib, setLib] = useState<Awaited<ReturnType<typeof loadLibrary>>>()
-  const root = useDismiss(open, () => setOpen(false))
-  useEffect(() => { if (open && q && !lib) loadLibrary().then(setLib) }, [open, q])
-  const pick = (icon: string) => { onPick(icon); setOpen(false); setQ('') }
-  const found = q && lib ? searchIcons(lib, q) : []
+  const [brands, setBrands] = useState<Brand[]>()
+  const root = useRef<HTMLDivElement>(null)
+  const pop = useRef<HTMLDivElement>(null)
+  const [at, setAt] = useState<CSSProperties>()
+  // The popover lives in a portal on the settings root, beside the panel: inside the scrolling list it
+  // would be clipped, and inside the glass (backdrop-filter) a fixed position would not be the viewport's.
+  useEffect(() => {
+    if (!open) return
+    const b = root.current!.getBoundingClientRect(), panel = root.current!.closest('.panel')!.getBoundingClientRect()
+    const side = panel.left > 340
+    setAt(side
+      ? { right: innerWidth - panel.left + 10, top: Math.max(12, Math.min(b.top - 8, innerHeight - 352)) }
+      : { left: panel.left, top: Math.max(12, panel.top - 352) })
+    const out = (e: PointerEvent) => !root.current?.contains(e.target as Node) && !pop.current?.contains(e.target as Node) && setOpen(false)
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && (e.stopPropagation(), setOpen(false))
+    document.addEventListener('pointerdown', out)
+    addEventListener('keydown', key, true)
+    return () => { document.removeEventListener('pointerdown', out); removeEventListener('keydown', key, true) }
+  }, [open])
+  useEffect(() => {
+    if (!open || !q) return
+    if (!lib) loadLibrary().then(setLib)
+    if (!brands) loadBrands().then(setBrands)
+  }, [open, q])
+  const pick = (icon: string, glyph?: Tile['glyph']) => { onPick(icon, glyph); setOpen(false); setQ('') }
+  const foundBrands = q && brands ? searchBrands(brands, q) : []
+  const foundIcons = q && lib ? searchIcons(lib, q, 56) : []
+  const brandColours = useSettings().tiles.brandColours
   return (
     <div className="icon-pick" ref={root}>
       <button type="button" className="icon-btn" aria-label="Choose icon" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {tile.icon === 'favicon' ? <img src={favicon(tile.url)} alt="" /> : tile.icon === 'letter' ? <b>{tile.name[0]?.toUpperCase()}</b> : <TileGlyph name={tile.icon} size={18} />}
+        {tile.icon === 'favicon' ? <img src={favicon(tile.url)} alt="" /> : tile.icon === 'letter' ? <b>{tile.name[0]?.toUpperCase()}</b>
+          : <TileGlyph name={tile.icon} glyph={tile.glyph} colour={brandColours} size={18} />}
       </button>
-      {open && (
-        <Glass className="icon-pop">
-          <Input autoFocus aria-label="Search icons" placeholder="Search 1,600 icons" value={q} onValueChange={setQ} />
-          <div className="icon-grid">
-            {!q && <>
-              <button type="button" onClick={() => pick('favicon')} data-active={tile.icon === 'favicon' || undefined}>Site</button>
-              <button type="button" onClick={() => pick('letter')} data-active={tile.icon === 'letter' || undefined}>Aa</button>
-              {Object.entries(icons).map(([k, I]) => (
-                <button type="button" key={k} aria-label={k} title={k} data-active={tile.icon === k || undefined} onClick={() => pick(k)}><I size={17} /></button>
-              ))}
+      {open && at && createPortal(
+        <Glass ref={pop} className="icon-pop" style={at}>
+          <Input autoFocus aria-label="Search icons and brands" placeholder="Search brands and icons" value={q} onValueChange={setQ} />
+          <div className="icon-scroll">
+            {!q && (
+              <div className="icon-grid">
+                <button type="button" onClick={() => pick('favicon')} data-active={tile.icon === 'favicon' || undefined}>Site</button>
+                <button type="button" onClick={() => pick('letter')} data-active={tile.icon === 'letter' || undefined}>Aa</button>
+                {Object.entries(icons).map(([k, I]) => (
+                  <button type="button" key={k} aria-label={k} title={k} data-active={tile.icon === k || undefined} onClick={() => pick(k)}><I size={17} /></button>
+                ))}
+              </div>
+            )}
+            {q && (!lib || !brands) && <p className="icon-empty">Loading…</p>}
+            {q && lib && brands && !foundBrands.length && !foundIcons.length && <p className="icon-empty">Nothing matches “{q}”.</p>}
+            {foundBrands.length > 0 && <>
+              <h4 className="icon-group">Brands</h4>
+              <div className="icon-grid">
+                {foundBrands.map(b => (
+                  <button type="button" key={b.slug} aria-label={b.title} title={b.title} data-active={tile.icon === `brand:${b.slug}` || undefined}
+                    onClick={() => pick(`brand:${b.slug}`, { d: b.path, hex: b.hex })}>
+                    <BrandGlyph d={b.path} hex={b.hex} size={17} colour={brandColours} />
+                  </button>
+                ))}
+              </div>
             </>}
-            {q && !lib && <p className="icon-empty">Loading icons…</p>}
-            {q && lib && !found.length && <p className="icon-empty">No icon matches “{q}”.</p>}
-            {found.map(n => {
-              const I = lib![n]!
-              return <button type="button" key={n} aria-label={n} title={n} data-active={tile.icon === `lucide:${n}` || undefined} onClick={() => pick(`lucide:${n}`)}><I size={17} /></button>
-            })}
+            {foundIcons.length > 0 && <>
+              <h4 className="icon-group">Icons</h4>
+              <div className="icon-grid">
+                {foundIcons.map(n => {
+                  const I = lib![n]!
+                  return <button type="button" key={n} aria-label={n} title={n} data-active={tile.icon === `lucide:${n}` || undefined} onClick={() => pick(`lucide:${n}`)}><I size={17} /></button>
+                })}
+              </div>
+            </>}
           </div>
-        </Glass>
+        </Glass>,
+        root.current!.closest('.settings')!,
       )}
     </div>
   )
@@ -184,38 +228,71 @@ function IconPick({ tile, onPick }: { tile: Tile; onPick: (icon: string) => void
 
 function TilesTab({ s }: { s: Settings }) {
   const t = s.tiles
-  const put = (list: Tile[]) => set('tiles.list', list)
-  const edit = (i: number, patch: Partial<Tile>) => put(t.list.map((x, j) => (j === i ? { ...x, ...patch } : x)))
-  const move = (i: number, d: number) => {
-    const l = [...t.list]
-    ;[l[i], l[i + d]] = [l[i + d]!, l[i]!]
-    put(l)
-  }
   return (
     <>
       <Toggle label="Show tabs" path="tiles.show" value={t.show} />
       <Toggle label="Labels" path="tiles.labels" value={t.labels} />
       <Choice label="Shape" path="tiles.shape" value={t.shape} items={[['squircle', 'Squircle'], ['circle', 'Circle']]} />
       <Range label="Size" path="tiles.size" value={t.size} min={40} max={110} step={1} unit="px" />
+      <Range label="Columns before wrapping" path="tiles.columns" value={t.columns} min={1} max={12} step={1} fmt={v => String(v)} />
+      <Range label="Spacing" path="tiles.gap" value={t.gap} min={4} max={60} step={1} unit="px" />
+      <Toggle label="Brand colours" path="tiles.brandColours" value={t.brandColours} />
       <Toggle label="Open in a new tab" path="tiles.newTab" value={t.newTab} />
-      <div className="tile-list">
-        {t.list.map((tile, i) => (
-          <div className="tile-row" key={tile.id}>
-            <IconPick tile={tile} onPick={icon => edit(i, { icon })} />
+      <p className="hint">The tabs themselves are edited from the <LayoutGrid size={13} /> button beside the settings.</p>
+    </>
+  )
+}
+
+/** The tab list, in its own popup: drag a row by its grip (or focus the grip and use the arrow keys) to reorder. */
+function TabsEditor({ s }: { s: Settings }) {
+  const list = s.tiles.list
+  const [drag, setDrag] = useState<number | null>(null)
+  const put = (l: Tile[]) => set('tiles.list', l)
+  const edit = (i: number, patch: Partial<Tile>) => put(list.map((x, j) => (j === i ? { ...x, ...patch } : x)))
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= list.length || from === to) return
+    const l = [...list]
+    l.splice(to, 0, l.splice(from, 1)[0]!)
+    put(l)
+  }
+  const tidyUrl = (i: number, raw: string) => {
+    const v = raw.trim()
+    if (!v) return
+    const url = /^[a-z]+:/i.test(v) ? v : `https://${v}`
+    const tile = list[i]!
+    let name = tile.name
+    if (!name.trim() || name === 'New') try { // name a fresh tab after its site
+      const host = new URL(url).hostname.replace(/^www\./, '').split('.')[0]!
+      name = host.charAt(0).toUpperCase() + host.slice(1)
+    } catch {}
+    edit(i, { url, name })
+  }
+  return (
+    <>
+      <header className="editor-head">
+        <h2>Tabs <span>{list.length}</span></h2>
+        <Button variant="filled" icon={<Plus size={16} />} onClick={() => put([...list, { id: crypto.randomUUID(), name: 'New', url: '', icon: 'favicon' }])}>Add</Button>
+      </header>
+      <div className="panel-body tile-list">
+        {!list.length && <p className="icon-empty">No tabs yet. Add one, give it an address, and it shows under the search bar.</p>}
+        {list.map((tile, i) => (
+          <div className="tile-row" key={tile.id} data-drag={drag === i || undefined}
+            onDragOver={e => { e.preventDefault(); if (drag !== null && drag !== i) { move(drag, i); setDrag(i) } }}>
+            <button type="button" className="grip" aria-label={`Move ${tile.name}, use arrow keys`} draggable
+              onDragStart={e => { setDrag(i); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setDragImage(e.currentTarget.parentElement!, 20, 20) }}
+              onDragEnd={() => setDrag(null)}
+              onKeyDown={e => { if (e.key === 'ArrowUp') { e.preventDefault(); move(i, i - 1) } if (e.key === 'ArrowDown') { e.preventDefault(); move(i, i + 1) } }}>
+              <GripVertical size={15} />
+            </button>
+            <IconPick tile={tile} onPick={(icon, glyph) => edit(i, { icon, glyph })} />
             <div className="tile-fields">
               <input className="field" value={tile.name} aria-label="Name" placeholder="Name" onChange={e => edit(i, { name: e.target.value })} />
-              <input className="field field-url" value={tile.url} aria-label="Address" placeholder="https://" spellCheck={false}
-                onChange={e => edit(i, { url: e.target.value })}
-                onBlur={e => !/^[a-z]+:/i.test(e.target.value) && e.target.value && edit(i, { url: `https://${e.target.value}` })} />
+              <input className="field field-url" value={tile.url} aria-label="Address" placeholder="example.com" spellCheck={false}
+                onChange={e => edit(i, { url: e.target.value })} onBlur={e => tidyUrl(i, e.target.value)} />
             </div>
-            <div className="tile-acts">
-              <button type="button" aria-label="Move up" disabled={!i} onClick={() => move(i, -1)}><ArrowUp size={14} /></button>
-              <button type="button" aria-label="Move down" disabled={i === t.list.length - 1} onClick={() => move(i, 1)}><ArrowDown size={14} /></button>
-              <button type="button" aria-label="Remove" className="danger" onClick={() => put(t.list.filter((_, j) => j !== i))}><Trash2 size={14} /></button>
-            </div>
+            <button type="button" aria-label={`Remove ${tile.name}`} className="row-x" onClick={() => put(list.filter((_, j) => j !== i))}><Trash2 size={15} /></button>
           </div>
         ))}
-        <Button icon={<Plus size={16} />} onClick={() => put([...t.list, { id: crypto.randomUUID(), name: 'New', url: 'https://', icon: 'favicon' }])}>Add a tab</Button>
       </div>
     </>
   )
@@ -301,7 +378,7 @@ function Footer({ s }: { s: Settings }) {
 function alertless(msg: string) { document.querySelector('.panel-status')!.textContent = msg }
 
 const tabs = [
-  { value: 'bg', label: 'Background', icon: <ImageIcon size={16} />, C: BackgroundTab },
+  { value: 'bg', label: 'Picture', icon: <ImageIcon size={16} />, C: BackgroundTab },
   { value: 'look', label: 'Glass', icon: <Droplet size={16} />, C: Look },
   { value: 'clock', label: 'Text', icon: <Clock3 size={16} />, C: ClockTab },
   { value: 'search', label: 'Search', icon: <Search size={16} />, C: SearchTab },
@@ -311,21 +388,22 @@ const tabs = [
 
 export function SettingsMenu() {
   const s = useSettings()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState<'settings' | 'tabs' | null>(null)
   const [tab, setTab] = useState('bg')
   const root = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
-    const key = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    const out = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(null)
+    const out = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(null)
     addEventListener('keydown', key)
     document.addEventListener('pointerdown', out)
     return () => { removeEventListener('keydown', key); document.removeEventListener('pointerdown', out) }
   }, [open])
   const C = tabs.find(t => t.value === tab)!.C
+  const toggle = (which: 'settings' | 'tabs') => setOpen(o => (o === which ? null : which))
   return (
     <div className="settings" ref={root}>
-      {open && (
+      {open === 'settings' && (
         <Glass className="panel" role="dialog" aria-label="Customize">
           <TabBar aria-label="Sections" items={tabs.map(({ C: _, ...t }) => t)} value={tab} onValueChange={setTab} />
           <div className="panel-body" key={tab}><C s={s} /></div>
@@ -333,7 +411,11 @@ export function SettingsMenu() {
           <Footer s={s} />
         </Glass>
       )}
-      <Button className="gear" icon={<Settings2 size={20} />} aria-label="Customize" aria-expanded={open} onClick={() => setOpen(!open)} />
+      {open === 'tabs' && <Glass className="panel panel-tabs" role="dialog" aria-label="Tabs"><TabsEditor s={s} /></Glass>}
+      <div className="dock">
+        <Button className="dock-btn" icon={<LayoutGrid size={19} />} aria-label="Edit tabs" aria-expanded={open === 'tabs'} onClick={() => toggle('tabs')} />
+        <Button className="gear" icon={<Settings2 size={20} />} aria-label="Customize" aria-expanded={open === 'settings'} onClick={() => toggle('settings')} />
+      </div>
     </div>
   )
 }

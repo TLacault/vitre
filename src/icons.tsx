@@ -62,12 +62,36 @@ export function searchIcons(lib: Library, q: string, max = 84) {
 }
 
 /** A tile's icon by its stored value: a curated key or 'lucide:Name'. */
-export function TileGlyph({ name, size }: { name: string; size: number | string }) {
+export function TileGlyph({ name, size, glyph, colour }: { name: string; size: number | string; glyph?: { d: string; hex: string }; colour?: boolean }) {
   const [Lib, setLib] = useState<LucideIcon>()
   const Curated = icons[name]
   useEffect(() => {
     if (!Curated && name.startsWith('lucide:')) loadLibrary().then(l => setLib(() => l[name.slice(7)]))
   }, [name])
+  if (name.startsWith('brand:') && glyph) return <BrandGlyph d={glyph.d} hex={glyph.hex} size={size} colour={colour} />
   const I = Curated ?? Lib
   return I ? <I size={size} strokeWidth={1.6} /> : null
+}
+
+// Brands and websites (Simple Icons, CC0, ~3,500): public/brands.json, fetched only by a search. A tile
+// keeps the chosen mark's path and colour itself ('brand:slug' + glyph), so a new tab never loads the set.
+export type Brand = { slug: string; title: string; hex: string; path: string }
+let brands: Promise<Brand[]> | undefined
+export const loadBrands = () =>
+  (brands ??= fetch('./brands.json') // built by scripts/brands.mjs
+    .then(r => r.json() as Promise<[string, string, string, string][]>)
+    .then(rows => rows.map(([slug, title, hex, path]) => ({ slug, title, hex, path }))))
+
+export function searchBrands(all: Brand[], q: string, max = 42) {
+  const needle = q.trim().toLowerCase()
+  const hits = all.filter(b => b.title.toLowerCase().includes(needle) || b.slug.includes(needle.replace(/[^a-z0-9]/g, '')))
+  return hits.sort((a, b) => +!a.title.toLowerCase().startsWith(needle) - +!b.title.toLowerCase().startsWith(needle) || a.title.length - b.title.length).slice(0, max)
+}
+
+/** A brand mark from its path; in its own colour unless that colour would vanish on dark glass. */
+export function BrandGlyph({ d, hex, size, colour }: { d: string; hex: string; size: number | string; colour?: boolean }) {
+  const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16))
+  const lum = (0.2126 * r! + 0.7152 * g! + 0.0722 * b!) / 255
+  const fill = colour && lum > 0.18 ? `#${hex}` : 'currentColor'
+  return <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"><path d={d} fill={fill} /></svg>
 }

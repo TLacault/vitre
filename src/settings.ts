@@ -3,7 +3,8 @@ import { useSyncExternalStore } from 'react'
 // Everything the page can be told, saved whole under one key. chrome.storage.local in the extension
 // (Brave, Chrome, Firefox all expose `chrome`), localStorage under `vite dev`.
 
-export type Tile = { id: string; name: string; url: string; icon: string } // icon: 'favicon' | 'letter' | lucide name
+// icon: 'favicon' | 'letter' | curated key | 'lucide:Name' | 'brand:slug' (with its glyph kept here)
+export type Tile = { id: string; name: string; url: string; icon: string; glyph?: { d: string; hex: string } }
 export type Entrance = 'none' | 'fade' | 'rise' | 'blur' | 'scale' | 'drop' | 'unfold'
 export type Reveal = 'none' | 'fade' | 'iris' | 'grid' | 'zoom' | 'plasma' | 'wipe' | 'blinds'
 
@@ -40,6 +41,9 @@ export const defaults = {
     labels: true,
     size: 64,
     shape: 'squircle' as 'circle' | 'squircle',
+    columns: 6,
+    gap: 22,
+    brandColours: true,
     newTab: false,
     list: [
       { id: 'gh', name: 'GitHub', url: 'https://github.com', icon: 'favicon' },

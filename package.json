@@ -6,7 +6,10 @@
     "dev": "vite",
     "build": "vite build",
     "zip": "vite build && cd dist && zip -qr ../vitre.zip .",
-    "test": "node --test test/*.ts"
+    "test": "node --test test/*.ts",
+    "brands": "node scripts/brands.mjs",
+    "predev": "node scripts/brands.mjs",
+    "prebuild": "node scripts/brands.mjs"
   },
   "author": "Tim Lacault",
   "license": "MIT",
@@ -26,7 +29,8 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.3.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.8"
+    "vite": "^8.3.8",
+    "simple-icons": "^16.37.0"
   },
   "type": "module"
 }

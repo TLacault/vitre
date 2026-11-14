@@ -170,7 +170,11 @@ button { font: inherit; color: inherit; }
 .search-glass input::placeholder { color: var(--soft); }
 .search-glass kbd { font: 500 11px/1 'Geist Mono Variable', monospace; color: var(--soft); letter-spacing: 0.04em; }
 
-.tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; max-width: 760px; }
+.tiles {
+  /* wraps after --cols tiles; the last row stays centred */
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap) var(--gap);
+  max-width: min(100%, calc(var(--cols) * (var(--tile) + 16px) + (var(--cols) - 1) * var(--gap)));
+}
 .tile {
   display: grid;
   justify-items: center;
@@ -321,6 +325,8 @@ button { font: inherit; color: inherit; }
 
 /* ——— settings */
 .settings { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; z-index: 10; }
+.dock { display: flex; gap: 8px; }
+.dock-btn[aria-expanded='true'], .gear[aria-expanded='true'] { color: var(--accent); }
 .gear svg { transition: transform 0.6s var(--ease); }
 .gear[aria-expanded='true'] svg { transform: rotate(90deg); }
 .panel {
@@ -406,32 +412,51 @@ button { font: inherit; color: inherit; }
 .hue i { top: 50%; }
 .color-pop .input { font-family: 'Geist Mono Variable', monospace; font-size: 13px; text-transform: lowercase; }
 
-.tile-list { display: grid; gap: 8px; }
-.tile-row { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 16px; background: var(--well); }
-.tile-fields { flex: 1; min-width: 0; display: grid; }
+.panel-tabs { width: min(400px, calc(100vw - 32px)); min-height: min(460px, calc(100svh - 100px)); }
+.editor-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 10px 12px; border-bottom: 1px solid var(--line); }
+.editor-head h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.editor-head h2 span { margin-left: 6px; font: 500 12px/1 'Geist Mono Variable', monospace; color: var(--soft); }
+.editor-head .btn { height: 34px; padding: 0 14px 0 11px; }
+.tile-list { gap: 6px; align-content: start; padding: 10px 6px 6px; }
+.tile-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 4px; border-radius: 16px; background: var(--well);
+  transition: background-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.tile-row:hover { background: var(--hover); }
+.tile-row[data-drag] { opacity: 0.5; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.tile-fields { flex: 1; min-width: 0; display: grid; gap: 1px; }
 .field {
-  border: 0; background: none; outline: none; color: inherit; padding: 2px 6px; border-radius: 6px;
-  font: 500 13.5px/1.4 'Geist Variable', system-ui;
+  min-width: 0; border: 0; background: none; outline: none; color: inherit; padding: 2px 7px; border-radius: 7px;
+  font: 500 14px/1.45 'Geist Variable', system-ui;
 }
-.field:focus { background: var(--hover); }
-.field-url { font: 400 12px/1.4 'Geist Mono Variable', monospace; color: var(--soft); }
-.tile-acts { display: flex; gap: 2px; }
-.tile-acts button, .icon-btn {
-  all: unset; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; cursor: pointer;
-  color: var(--soft); transition: background 0.2s, color 0.2s;
+.field:focus { background: var(--hover); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 60%, transparent); }
+.field::placeholder { color: var(--soft); }
+.field-url { font: 400 12px/1.45 'Geist Mono Variable', monospace; color: var(--soft); }
+.grip, .row-x {
+  all: unset; flex: none; display: grid; place-items: center; width: 24px; height: 36px; border-radius: 8px;
+  color: var(--soft); transition: color 0.2s, background-color 0.2s;
 }
-.tile-acts button:hover:not(:disabled), .icon-btn:hover { background: var(--hover); color: var(--ink); }
-.tile-acts button:disabled { opacity: 0.3; cursor: default; }
-.tile-acts .danger:hover { color: var(--danger); }
+.grip { cursor: grab; opacity: 0.55; }
+.grip:active { cursor: grabbing; }
+.tile-row:hover .grip, .grip:focus-visible { opacity: 1; }
+.row-x { width: 32px; height: 32px; cursor: pointer; opacity: 0; }
+.tile-row:hover .row-x, .row-x:focus-visible { opacity: 1; }
+.row-x:hover { color: var(--danger); background: color-mix(in oklab, var(--danger) 14%, transparent); }
+.hint { margin: 2px 0 0; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px; color: var(--soft); }
 .icon-pick { position: relative; }
-.icon-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--hover); color: var(--ink); }
+.icon-btn { all: unset; flex: none; display: grid; place-items: center; cursor: pointer; transition: background-color 0.2s; }
+.icon-btn:hover { background: var(--well); }
+.icon-btn { width: 42px; height: 42px; border-radius: 13px; background: var(--hover); color: var(--ink); }
+.icon-btn b { font: 600 16px/1 var(--display), system-ui; }
 .icon-btn img { width: 20px; height: 20px; border-radius: 4px; }
 .icon-pop {
-  position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; width: 300px; padding: 8px; border-radius: 18px;
-  display: grid; gap: 8px; animation: pop-down 0.3s var(--ease) backwards; transform-origin: top left;
+  position: fixed; z-index: 30; width: 300px; padding: 8px; border-radius: 18px;
+  display: grid; gap: 8px; animation: pop-down 0.3s var(--ease) backwards; transform-origin: top right;
 }
-.icon-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; max-height: 236px; overflow: hidden auto; scrollbar-width: none; }
-.icon-grid::-webkit-scrollbar { display: none; }
+.icon-scroll { display: grid; gap: 4px; max-height: 280px; align-content: start; overflow: hidden auto; scrollbar-width: none; }
+.icon-scroll::-webkit-scrollbar { display: none; }
+.icon-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.icon-group { margin: 6px 4px 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); }
 .icon-empty { grid-column: 1 / -1; margin: 10px 4px; font-size: 13px; color: var(--soft); }
 .icon-grid button { all: unset; display: grid; place-items: center; height: 34px; border-radius: 9px; cursor: pointer; font-size: 11px; font-weight: 600; }
 .icon-grid button:hover { background: var(--hover); }

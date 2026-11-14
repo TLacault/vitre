@@ -105,15 +105,16 @@ function SearchBar({ i }: { i: number }) {
 
 function TileIcon({ t }: { t: Tile }) {
   const [broken, setBroken] = useState(false)
+  const colour = useSettings().tiles.brandColours
   if (t.icon === 'favicon' && !broken) return <img src={favicon(t.url)} alt="" onError={() => setBroken(true)} draggable={false} />
   if (t.icon === 'letter' || t.icon === 'favicon') return <span className="letter">{t.name.trim()[0]?.toUpperCase() ?? '·'}</span>
-  return <TileGlyph name={t.icon} size="42%" />
+  return <TileGlyph name={t.icon} glyph={t.glyph} colour={colour} size="42%" />
 }
 
 function Tiles({ i }: { i: number }) {
   const t = useSettings().tiles
   return (
-    <nav className="tiles" aria-label="Favorites" style={{ '--tile': `${t.size}px`, '--tile-r': t.shape === 'circle' ? '50%' : '30%' } as CSSProperties}>
+    <nav className="tiles" aria-label="Favorites" style={{ '--tile': `${t.size}px`, '--tile-r': t.shape === 'circle' ? '50%' : '30%', '--cols': t.columns, '--gap': `${t.gap}px` } as CSSProperties}>
       {t.list.map((tile, k) => (
         <a key={tile.id} className="tile" href={tile.url} target={t.newTab ? '_blank' : undefined} rel="noreferrer" title={tile.name}>
           <Glass className="tile-glass enter" style={at(i + k)}><TileIcon t={tile} /></Glass>
