@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "zip": "vite build && node scripts/zip.mjs",
-    "test": "node --test test/*.ts",
+    "test": "node --experimental-transform-types --import ./test/resolve.mjs --test test/*.ts",
     "brands": "node scripts/brands.mjs",
     "predev": "node scripts/brands.mjs",
     "prebuild": "node scripts/brands.mjs",

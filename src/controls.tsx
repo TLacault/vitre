@@ -4,29 +4,29 @@ import { set } from './settings'
 
 // Settings rows: every control is the page's own (ui.tsx), none is a browser default.
 
-export function Row({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
+export function Row({ label, hint, tip, children }: { label: string; hint?: ReactNode; tip?: string; children: ReactNode }) {
   return (
     <div className="row">
-      <div className="row-label"><span>{label}</span>{hint != null && <output>{hint}</output>}</div>
+      <div className="row-label"><span title={tip}>{label}</span>{hint != null && <output>{hint}</output>}</div>
       <div className="row-control">{children}</div>
     </div>
   )
 }
 
-export function Toggle({ label, path, value }: { label: string; path: string; value: boolean }) {
+export function Toggle({ label, path, value, tip }: { label: string; path: string; value: boolean; tip?: string }) {
   return (
     <div className="row row-inline">
-      <span className="row-label">{label}</span>
+      <span className="row-label" title={tip}>{label}</span>
       <Switch aria-label={label} checked={value} onCheckedChange={v => set(path, v)} />
     </div>
   )
 }
 
-export function Range({ label, path, value, min, max, step = 0.01, unit = '', fmt }: {
-  label: string; path: string; value: number; min: number; max: number; step?: number; unit?: string; fmt?: (v: number) => string
+export function Range({ label, path, value, min, max, step = 0.01, unit = '', fmt, tip }: {
+  label: string; path: string; value: number; min: number; max: number; step?: number; unit?: string; fmt?: (v: number) => string; tip?: string
 }) {
   return (
-    <Row label={label} hint={(fmt ? fmt(value) : +value.toFixed(2)) + unit}>
+    <Row label={label} tip={tip} hint={(fmt ? fmt(value) : +value.toFixed(2)) + unit}>
       <Slider aria-label={label} min={min} max={max} step={step} value={value} onValueChange={v => set(path, v)} />
     </Row>
   )

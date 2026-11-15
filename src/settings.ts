@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { ANIMAL_KEYS, ANIMALS, type AnimalKey } from './ascii/animals'
 
 // Everything the page can be told, saved whole under one key. chrome.storage.local in the extension
 // (Brave, Chrome, Firefox all expose `chrome`), localStorage under `vite dev`.
@@ -19,7 +20,7 @@ export const defaults = {
     fixedId: 'default',
     grain: true,
     grainOpacity: 0.5,
-    kind: 'image' as 'shader' | 'image',
+    kind: 'image' as 'shader' | 'image' | 'animals',
     periodHours: 24,
     reveal: 'iris' as Reveal,
     revealMs: 1000,
@@ -32,6 +33,11 @@ export const defaults = {
     palette: 'grid',
     swirl: 1,
     vibrance: 0.85,
+  },
+  // Every animal's knobs, saved per animal, so switching back finds them as left.
+  animals: {
+    kind: 'butterflies' as AnimalKey,
+    tune: Object.fromEntries(ANIMAL_KEYS.map(k => [k, { ...ANIMALS[k].defaults }])) as unknown as Record<AnimalKey, Record<string, number | boolean>>,
   },
   glass: {
     frost: 10,

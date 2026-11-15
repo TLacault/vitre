@@ -72,6 +72,7 @@ button { font: inherit; color: inherit; }
 .app, .bg, .layer { position: fixed; inset: 0; }
 .layer, .reveal, .reveal-content, .cover { position: absolute; inset: 0; }
 .photo { width: 100%; height: 100%; object-fit: cover; }
+.ascii { width: 100%; height: 100%; display: block; font-family: 'Geist Mono Variable', ui-monospace, monospace; }
 .grain {
   pointer-events: none;
   mix-blend-mode: overlay;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ShaderFitOptions, ShaderMount, getShaderColorFromString, meshGradientFragmentShader } from '@paper-design/shaders'
+import { AnimalEngine } from './ascii'
 import { pick, usePics } from './gallery'
 import { Reveal } from './Reveal'
 import { palettes, useSettings } from './settings'
@@ -74,6 +75,24 @@ function Photo({ onReady }: { onReady: () => void }) {
   }} />
 }
 
+function Animals({ onReady }: { onReady: () => void }) {
+  const a = useSettings().animals
+  const el = useRef<HTMLCanvasElement>(null)
+  const engine = useRef<AnimalEngine>(undefined)
+  const tune = a.tune[a.kind]
+  useEffect(() => {
+    const e = (engine.current = new AnimalEngine(el.current!, { animal: a.kind, theme: 'dark', tuning: tune }))
+    requestAnimationFrame(() => { onReady(); remember([6, 7, 12]) }) // the renderer's dark ground
+    return () => e.destroy()
+  }, [])
+  useEffect(() => {
+    const e = engine.current!
+    if (e.animal.key !== a.kind) return e.setAnimal(a.kind, tune)
+    for (const k in tune) if (e.tuning[k] !== tune[k]) e.set(k, tune[k]!)
+  }, [a.kind, tune])
+  return <canvas ref={el} className="layer ascii" />
+}
+
 export function Background() {
   const s = useSettings().bg
   const empty = !usePics().length // an empty gallery falls back to the shader
@@ -89,7 +108,7 @@ export function Background() {
     <div className="bg" aria-hidden="true">
       <Reveal run={run} ready={ready} kind={s.reveal} ms={s.revealMs}>
         <div className="layer" style={{ filter: s.blur ? `blur(${s.blur}px)` : undefined, inset: s.blur ? -s.blur * 2 : 0 }}>
-          {s.kind === 'image' && !empty ? <Photo onReady={onReady} /> : <Shader onReady={onReady} />}
+          {s.kind === 'animals' ? <Animals onReady={onReady} /> : s.kind === 'image' && !empty ? <Photo onReady={onReady} /> : <Shader onReady={onReady} />}
         </div>
         <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
         {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity }} />}

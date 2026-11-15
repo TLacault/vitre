@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { Button, Glass, Input, Switch, TabBar } from './ui'
 import GripVertical from 'lucide-react/icons/grip-vertical'
@@ -18,6 +18,7 @@ import X from 'lucide-react/icons/x'
 import { add, remove, usePics, type Pic } from './gallery'
 import { defaults, engines, get, merge, palettes, save, set, useSettings, type Entrance, type Reveal as RevealKind, type Settings, type Tile } from './settings'
 import { Reveal } from './Reveal'
+import { ANIMAL_KEYS, ANIMALS, SHARED_CONTROLS, type KnobSpec } from './ascii'
 import { Choice, Color, Drop, Range, Row, Text, Toggle } from './controls'
 import { BrandGlyph, favicon, icons, loadBrands, loadLibrary, searchBrands, searchIcons, TileGlyph, type Brand } from './icons'
 
@@ -43,8 +44,8 @@ function BackgroundTab({ s }: { s: Settings }) {
   const b = s.bg, sh = s.shader
   return (
     <>
-      <Choice label="Kind" path="bg.kind" value={b.kind} items={[['shader', 'Shader'], ['image', 'Image']]} />
-      {b.kind === 'image' ? (
+      <Choice label="Kind" path="bg.kind" value={b.kind} items={[['shader', 'Shader'], ['image', 'Image'], ['animals', 'Animals']]} />
+      {b.kind === 'animals' ? <AnimalsTab s={s} /> : b.kind === 'image' ? (
         <>
           <Row label="Gallery" hint={`${pics.length} cached`}>
             <div className="gallery">
@@ -80,6 +81,40 @@ function BackgroundTab({ s }: { s: Settings }) {
       <Reveals s={s} />
       <Toggle label="Grain" path="bg.grain" value={b.grain} />
       {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={0.5} fmt={v => `${Math.round(v * 100)}%`} />}
+    </>
+  )
+}
+
+/** Every knob ascii-animals exposes, for the chosen animal: Movement, its own groups, then Look. */
+function AnimalsTab({ s }: { s: Settings }) {
+  const { kind, tune } = s.animals
+  const a = ANIMALS[kind], t = tune[kind]
+  const knob = (k: KnobSpec) => {
+    if (a.hide?.includes(k.key as never)) return null
+    const path = `animals.tune.${kind}.${k.key}`
+    // the vendored hint talks to the demo's author; the number is already beside the slider here
+    const tip = k.key === 'hueShift' ? 'Turns the animal\'s colour around the colour wheel, in degrees.' : k.hint
+    if ('toggle' in k) return <Toggle key={k.key} label={k.label} path={path} value={!!t[k.key]} tip={tip} />
+    if (k.disabledWhen && t[k.disabledWhen]) return null
+    return <Range key={k.key} label={k.label} path={path} value={+(t[k.key] ?? 0)} min={k.min} max={k.max} step={k.step} tip={tip} />
+  }
+  const groups: [string, KnobSpec[]][] = [['Movement', SHARED_CONTROLS.movement], ...a.controls, ['Look', SHARED_CONTROLS.look]]
+  return (
+    <>
+      <Row label="Animal">
+        <div className="palettes">
+          {ANIMAL_KEYS.map(k => (
+            <button type="button" key={k} className="palette" aria-pressed={kind === k} onClick={() => set('animals.kind', k)}>
+              <i style={{ background: `rgb(${ANIMALS[k].swatch.join(' ')})` }} />
+              <span>{ANIMALS[k].label}</span>
+            </button>
+          ))}
+        </div>
+      </Row>
+      <p className="hint">Click anywhere on the page to startle them. Hover a label for what it does.</p>
+      {groups.map(([title, knobs]) => <Fragment key={title}><h3 className="section">{title}</h3>{knobs.map(knob)}</Fragment>)}
+      <Button icon={<RotateCcw size={16} />} onClick={() => set(`animals.tune.${kind}`, { ...a.defaults })}>Reset {a.label.toLowerCase()}</Button>
+      <h3 className="section">Picture</h3>
     </>
   )
 }
