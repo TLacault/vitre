@@ -51,6 +51,7 @@ function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
       <Range label="Dim" path="bg.dim" value={b.dim} min={0} max={0.8} fmt={v => `${Math.round(v * 100)}%`} />
       <Reveals s={s} />
       <Toggle label="Grain" path="bg.grain" value={b.grain} />
+      {b.grain && <Choice label="Grain style" path="bg.grainStyle" value={b.grainStyle} items={[['fine', 'Fine'], ['grid', 'The Grid']]} />}
       {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={1} fmt={v => `${Math.round(v * 100)}%`} />}
       {b.grain && <Range label="Grain size" path="bg.grainSize" value={b.grainSize} min={1} max={6} step={0.1} unit="×" />}
       <Choice label="Kind" path="bg.kind" value={b.kind} items={[['animals', 'Animals'], ['shader', 'Shader'], ['image', 'Image']]} />

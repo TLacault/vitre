@@ -31,7 +31,8 @@ function average(img: HTMLImageElement) {
 }
 
 function Shader({ onReady }: { onReady: () => void }) {
-  const sh = useSettings().shader
+  const { shader: sh, bg } = useSettings()
+  const mixer = bg.grain && bg.grainStyle === 'grid' ? 0.1 : 0 // The Grid's grain also jitters the colour mixing
   const el = useRef<HTMLDivElement>(null)
   const mount = useRef<ShaderMount>(undefined)
   const hex = (palettes[sh.palette] ?? palettes.dusk!).colors.map(c => tune(c, sh.vibrance, sh.light))
@@ -41,7 +42,7 @@ function Shader({ onReady }: { onReady: () => void }) {
   useEffect(() => {
     mount.current = new ShaderMount(el.current!, meshGradientFragmentShader, {
       u_colors: colors, u_colorsCount: colors.length, u_distortion: sh.distortion, u_swirl: sh.swirl,
-      u_grainMixer: 0, u_grainOverlay: 0,
+      u_grainMixer: mixer, u_grainOverlay: 0,
       u_fit: ShaderFitOptions.cover, u_scale: 1, u_rotation: 0, u_originX: 0.5, u_originY: 0.5,
       u_offsetX: 0, u_offsetY: 0, u_worldWidth: 0, u_worldHeight: 0,
     }, undefined, speed(), Math.random() * 1e4, 1, 1600 * 900) // random frame: each tab opens on a different moment
@@ -49,12 +50,12 @@ function Shader({ onReady }: { onReady: () => void }) {
     return () => mount.current?.dispose()
   }, [])
   useEffect(() => {
-    mount.current?.setUniforms({ u_colors: colors, u_colorsCount: colors.length, u_distortion: sh.distortion, u_swirl: sh.swirl })
+    mount.current?.setUniforms({ u_colors: colors, u_colorsCount: colors.length, u_distortion: sh.distortion, u_swirl: sh.swirl, u_grainMixer: mixer })
     mount.current?.setSpeed(speed())
     const vis = () => mount.current?.setSpeed(speed())
     document.addEventListener('visibilitychange', vis)
     return () => document.removeEventListener('visibilitychange', vis)
-  }, [sh])
+  }, [sh, mixer])
   return <div ref={el} className="layer" />
 }
 
@@ -101,6 +102,40 @@ export function grain(size: number) {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
 }
 
+/** The Grid's grain: the overlay pass of paper-design's mesh gradient, alone, so it sits over any kind. */
+const gridGrain = `#version 300 es
+precision mediump float;
+uniform float u_amount;
+uniform float u_size;
+uniform float u_pixelRatio;
+out vec4 fragColor;
+float hash21(vec2 p) { p = fract(p * vec2(0.3183099, 0.3678794)) + 0.1; p += dot(p, p + 19.19); return fract(p.x * p.y); }
+float valueNoise(vec2 st) {
+  vec2 i = floor(st), f = fract(st), u = f * f * (3. - 2. * f);
+  float a = hash21(i), b = hash21(i + vec2(1., 0.)), c = hash21(i + vec2(0., 1.)), d = hash21(i + vec2(1., 1.));
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+vec2 rotate(vec2 p, float t) { return mat2(cos(t), sin(t), -sin(t), cos(t)) * p; }
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_pixelRatio / (1.5 * u_size);
+  float g = mix(valueNoise(rotate(uv, 1.) + vec2(3.)), valueNoise(rotate(uv, 2.) + vec2(-1.)), .5);
+  g = pow(g, 1.3);
+  float v = g * 2. - 1.;
+  float a = .35 * pow(u_amount * abs(v), .8);
+  fragColor = vec4(vec3(step(0., v)) * a, a);
+}`
+
+function GridGrain({ amount, size }: { amount: number; size: number }) {
+  const el = useRef<HTMLDivElement>(null)
+  const mount = useRef<ShaderMount>(undefined)
+  useEffect(() => {
+    mount.current = new ShaderMount(el.current!, gridGrain, { u_amount: amount, u_size: size })
+    return () => mount.current?.dispose()
+  }, [])
+  useEffect(() => mount.current?.setUniforms({ u_amount: amount, u_size: size }), [amount, size])
+  return <div ref={el} className="layer" style={{ pointerEvents: 'none' }} />
+}
+
 export function Background() {
   const s = useSettings().bg
   const empty = !usePics().length // an empty gallery falls back to the shader
@@ -119,7 +154,8 @@ export function Background() {
           {s.kind === 'animals' ? <Animals onReady={onReady} /> : s.kind === 'image' && !empty ? <Photo onReady={onReady} /> : <Shader onReady={onReady} />}
         </div>
         <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
-        {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity, backgroundImage: grain(s.grainSize) }} />}
+        {s.grain && s.grainStyle === 'grid' && <GridGrain amount={s.grainOpacity} size={s.grainSize} />}
+        {s.grain && s.grainStyle !== 'grid' && <div className="layer grain" style={{ opacity: s.grainOpacity, backgroundImage: grain(s.grainSize) }} />}
       </Reveal>
     </div>
   )

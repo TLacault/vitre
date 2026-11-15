@@ -21,6 +21,7 @@ export const defaults = {
     grain: true,
     grainOpacity: 0.5,
     grainSize: 1,
+    grainStyle: 'fine' as 'fine' | 'grid',
     kind: 'image' as 'shader' | 'image' | 'animals',
     periodHours: 24,
     reveal: 'iris' as Reveal,
