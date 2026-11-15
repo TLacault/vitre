@@ -414,6 +414,9 @@ button { font: inherit; color: inherit; }
 .color-pop .input { font-family: 'Geist Mono Variable', monospace; font-size: 13px; text-transform: lowercase; }
 
 .panel-tabs { width: min(400px, calc(100vw - 32px)); }
+/* beside the settings panel, bottoms aligned; on a phone it covers it */
+.panel-tune { position: absolute; right: calc(100% + 12px); bottom: 56px; width: 340px; transform-origin: bottom right; }
+@media (max-width: 860px) { .panel-tune { right: 0; z-index: 1; width: min(440px, calc(100vw - 32px)); } }
 .editor-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 10px 12px; border-bottom: 1px solid var(--line); }
 .editor-head h2 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .editor-head h2 span { margin-left: 6px; font: 500 12px/1 'Geist Mono Variable', monospace; color: var(--soft); }

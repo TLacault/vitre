@@ -11,6 +11,7 @@ import Plus from 'lucide-react/icons/plus'
 import RotateCcw from 'lucide-react/icons/rotate-ccw'
 import Search from 'lucide-react/icons/search'
 import Settings2 from 'lucide-react/icons/settings-2'
+import SlidersHorizontal from 'lucide-react/icons/sliders-horizontal'
 import Sparkles from 'lucide-react/icons/sparkles'
 import Trash2 from 'lucide-react/icons/trash-2'
 import Upload from 'lucide-react/icons/upload'
@@ -39,13 +40,13 @@ function Thumb({ pic, active, onPick }: { pic: Pic; active: boolean; onPick: () 
   )
 }
 
-function BackgroundTab({ s }: { s: Settings }) {
+function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
   const pics = usePics()
   const b = s.bg, sh = s.shader
   return (
     <>
       <Choice label="Kind" path="bg.kind" value={b.kind} items={[['shader', 'Shader'], ['image', 'Image'], ['animals', 'Animals']]} />
-      {b.kind === 'animals' ? <AnimalsTab s={s} /> : b.kind === 'image' ? (
+      {b.kind === 'animals' ? <AnimalsTab s={s} fine={fine} setFine={setFine} /> : b.kind === 'image' ? (
         <>
           <Row label="Gallery" hint={`${pics.length} cached`}>
             <div className="gallery">
@@ -85,8 +86,50 @@ function BackgroundTab({ s }: { s: Settings }) {
   )
 }
 
-/** Every knob ascii-animals exposes, for the chosen animal: Movement, its own groups, then Look. */
-function AnimalsTab({ s }: { s: Settings }) {
+/** Moods over the animal's own defaults; only shared knobs, so each works for every animal. */
+const moods: [string, Record<string, number>][] = [
+  ['Natural', {}],
+  ['Calm', { density: 0.6, speed: 0.55, sparkle: 0, trail: 0.6 }],
+  ['Swarm', { density: 2.6, speed: 1.2, separation: 300 }],
+  ['Distant', { size: 0.7, farthest: 0.12, farBias: 2.2, fog: 0.7 }],
+  ['Vivid', { speed: 1.5, shimmer: 0.8, sparkle: 0.3, trail: 2.2 }],
+]
+
+type Fine = { fine?: boolean; setFine?: (v: boolean) => void }
+
+/** The animal and a mood; every knob lives in the fine-tune panel beside the settings. */
+function AnimalsTab({ s, fine, setFine }: { s: Settings } & Fine) {
+  const { kind, tune } = s.animals
+  const a = ANIMALS[kind], t = tune[kind]
+  const at = (m: Record<string, number>) => ({ ...a.defaults, ...m })
+  const current = moods.find(([, m]) => Object.entries(at(m)).every(([k, v]) => t[k] === v))?.[0]
+  return (
+    <>
+      <Row label="Animal">
+        <div className="palettes">
+          {ANIMAL_KEYS.map(k => (
+            <button type="button" key={k} className="palette" aria-pressed={kind === k} onClick={() => set('animals.kind', k)}>
+              <i style={{ background: `rgb(${ANIMALS[k].swatch.join(' ')})` }} />
+              <span>{ANIMALS[k].label}</span>
+            </button>
+          ))}
+        </div>
+      </Row>
+      <Row label="Mood" hint={current ? undefined : 'Custom'}>
+        <div className="chips">
+          {moods.map(([label, m]) => (
+            <Button key={label} variant={label === current ? 'filled' : 'glass'} onClick={() => set(`animals.tune.${kind}`, at(m))}>{label}</Button>
+          ))}
+        </div>
+      </Row>
+      <Button icon={<SlidersHorizontal size={16} />} aria-expanded={!!fine} onClick={() => setFine?.(!fine)}>Fine-tune {a.label.toLowerCase()}</Button>
+      <p className="hint">Click anywhere on the page to startle them.</p>
+    </>
+  )
+}
+
+/** Every knob ascii-animals exposes for the chosen animal: Movement, its own groups, then Look. */
+function AnimalTuner({ s, onClose }: { s: Settings; onClose: () => void }) {
   const { kind, tune } = s.animals
   const a = ANIMALS[kind], t = tune[kind]
   const knob = (k: KnobSpec) => {
@@ -101,20 +144,17 @@ function AnimalsTab({ s }: { s: Settings }) {
   const groups: [string, KnobSpec[]][] = [['Movement', SHARED_CONTROLS.movement], ...a.controls, ['Look', SHARED_CONTROLS.look]]
   return (
     <>
-      <Row label="Animal">
-        <div className="palettes">
-          {ANIMAL_KEYS.map(k => (
-            <button type="button" key={k} className="palette" aria-pressed={kind === k} onClick={() => set('animals.kind', k)}>
-              <i style={{ background: `rgb(${ANIMALS[k].swatch.join(' ')})` }} />
-              <span>{ANIMALS[k].label}</span>
-            </button>
-          ))}
+      <header className="editor-head">
+        <h2>{a.label}</h2>
+        <div className="chips">
+          <Button icon={<RotateCcw size={15} />} onClick={() => set(`animals.tune.${kind}`, { ...a.defaults })}>Reset</Button>
+          <Button icon={<X size={16} />} aria-label="Close fine-tune" onClick={onClose} />
         </div>
-      </Row>
-      <p className="hint">Click anywhere on the page to startle them. Hover a label for what it does.</p>
-      {groups.map(([title, knobs]) => <Fragment key={title}><h3 className="section">{title}</h3>{knobs.map(knob)}</Fragment>)}
-      <Button icon={<RotateCcw size={16} />} onClick={() => set(`animals.tune.${kind}`, { ...a.defaults })}>Reset {a.label.toLowerCase()}</Button>
-      <h3 className="section">Picture</h3>
+      </header>
+      <div className="panel-body">
+        <p className="hint">Hover a label for what it does.</p>
+        {groups.map(([title, knobs]) => <Fragment key={title}><h3 className="section">{title}</h3>{knobs.map(knob)}</Fragment>)}
+      </div>
     </>
   )
 }
@@ -439,6 +479,7 @@ export function SettingsMenu() {
   const s = useSettings()
   const [open, setOpen] = useState<'settings' | 'tabs' | null>(null)
   const [tab, setTab] = useState('bg')
+  const [fine, setFine] = useState(false)
   const root = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!open) return
@@ -455,10 +496,13 @@ export function SettingsMenu() {
       {open === 'settings' && (
         <Glass className="panel" role="dialog" aria-label="Customize">
           <TabBar aria-label="Sections" items={tabs.map(({ C: _, ...t }) => t)} value={tab} onValueChange={setTab} />
-          <div className="panel-body" key={tab}><C s={s} /></div>
+          <div className="panel-body" key={tab}><C s={s} fine={fine} setFine={setFine} /></div>
           <p className="panel-status" role="status" />
           <Footer s={s} />
         </Glass>
+      )}
+      {open === 'settings' && fine && tab === 'bg' && s.bg.kind === 'animals' && (
+        <Glass className="panel panel-tune" role="dialog" aria-label="Fine-tune animals"><AnimalTuner s={s} onClose={() => setFine(false)} /></Glass>
       )}
       {open === 'tabs' && <Glass className="panel panel-tabs" role="dialog" aria-label="Tabs"><TabsEditor s={s} /></Glass>}
       <div className="dock">
