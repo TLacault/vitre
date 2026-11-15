@@ -9,6 +9,13 @@ export type Tile = { id: string; name: string; url: string; icon: string; glyph?
 export type Entrance = 'none' | 'fade' | 'rise' | 'blur' | 'scale' | 'drop' | 'unfold'
 export type Reveal = 'none' | 'fade' | 'iris' | 'grid' | 'zoom' | 'plasma' | 'wipe' | 'blinds'
 
+/** The author's tuning over each animal's own defaults. */
+const mine = {
+  butterflies: { density: 1.5, size: 1.4, grid: 0.8 },
+  koi: { density: 2.05, spread: 0.16, size: 1.85 },
+  jellyfish: { density: 2, size: 1.3, grid: 0.5 },
+}
+
 // The defaults are the author's own setup, with the bundled wallpaper (public/wallpapers/default.webp).
 export const defaults = {
   theme: 'dark' as 'auto' | 'light' | 'dark',
@@ -16,13 +23,13 @@ export const defaults = {
   font: 'geist' as 'geist' | 'serif' | 'mono',
   bg: {
     blur: 0,
-    dim: 0.5,
+    dim: 0.3,
     fixedId: 'default',
-    grain: true,
-    grainOpacity: 0.5,
+    grain: false,
+    grainOpacity: 0.13,
     grainSize: 1,
-    grainStyle: 'fine' as 'fine' | 'grid',
-    kind: 'image' as 'shader' | 'image' | 'animals',
+    grainStyle: 'grid' as 'fine' | 'grid',
+    kind: 'animals' as 'shader' | 'image' | 'animals',
     periodHours: 24,
     reveal: 'iris' as Reveal,
     revealMs: 1000,
@@ -31,15 +38,15 @@ export const defaults = {
   shader: {
     distortion: 1,
     light: 0.4,
-    motion: 0.56,
-    palette: 'grid',
+    motion: 0.3,
+    palette: 'ocean',
     swirl: 1,
     vibrance: 0.85,
   },
   // Every animal's knobs, saved per animal, so switching back finds them as left.
   animals: {
     kind: 'butterflies' as AnimalKey,
-    tune: Object.fromEntries(ANIMAL_KEYS.map(k => [k, { ...ANIMALS[k].defaults }])) as unknown as Record<AnimalKey, Record<string, number | boolean>>,
+    tune: Object.fromEntries(ANIMAL_KEYS.map(k => [k, { ...ANIMALS[k].defaults, ...mine[k as keyof typeof mine] }])) as unknown as Record<AnimalKey, Record<string, number | boolean>>,
   },
   glass: {
     frost: 10,
@@ -54,12 +61,12 @@ export const defaults = {
     h24: true,
     seconds: false,
     show: true,
-    size: 0.95,
+    size: 0.93,
     weight: 520,
   },
   welcome: {
     glass: false,
-    show: true,
+    show: false,
     text: '{greeting}.',
   },
   search: {
