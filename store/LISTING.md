@@ -7,8 +7,8 @@ Package: `vitre-chrome-1.0.0.zip` (`pnpm zip`). Images in this folder. Copy each
 **Name** (read from the manifest)
 Vitre – Glass New Tab
 
-**Summary** (from the manifest, 119/132 characters)
-A new tab made of glass: your picture or a living gradient, a glass clock, search and your sites. Customise everything.
+**Summary** (from the manifest, 122/132 characters)
+A new tab made of glass over ASCII animals, your pictures or a living gradient, with a glass clock, search and your sites.
 
 **Category**
 Make Chrome Yours → Functionality & UI
@@ -18,39 +18,66 @@ English
 
 **Description**
 
-Vitre turns every new tab into a quiet pane of frosted glass over a picture you love.
+░▒▓  A new tab made of glass  ▓▒░
 
-Open a tab and your background arrives with an iris, a plasma dissolve or a grid of tiles, then the clock, the search bar and your favourite sites settle in on top, each one a piece of glass blurring what is behind it. Nothing else: no feeds, no news, no account.
+Vitre turns every new tab into a quiet pane of frosted glass. Behind it: a picture you love, a slow living gradient, or a flock of ASCII animals drifting by. In front: a clock, a search bar and your favourite sites, each one a piece of glass blurring what's behind it.
 
-YOUR BACKGROUND
-• Add your own pictures. They are cached in the browser, so a new tab opens instantly, even offline.
-• Show a new one on every tab, every few hours, or always the same.
-• Or pick a living mesh gradient in one of nine palettes, with its motion, vibrance and luminosity.
-• Or let ASCII animals drift across it: butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs, each with five moods and every knob to fine-tune.
-• Blur, dim and grain on top of any of them, with two grain styles and a size from fine to coarse.
-• Eight reveals for how it arrives: iris, grid, plasma, zoom out, wipe, blinds, fade or none.
+No feeds. No news. No account. Just a calm place to start from.
 
-GLASS, YOUR WAY
-• Frost, tint, saturation, rim light and roundness, all live as you drag.
-• A clock in glass digits, cut out of the glass itself, or plain, at any size and weight.
-• A welcome line that greets you by the time of day.
-• Dark, light or follow the system, an accent colour and three typefaces.
+━━━━━━━━━━━━━━━━━━━━
 
-YOUR SITES
-• Favourite tabs as glass buttons, with or without labels, in as many columns as you like.
-• Give each one its site's icon, a letter, one of 3,500 brand marks (YouTube, Netflix, GitHub, Spotify…) or one of 1,600 icons, all searchable.
-• Edit the list in its own panel: drag to reorder, and a new tab names itself after its site.
+✦ NEW IN 1.1: ASCII ANIMALS 🦋
 
-SEARCH
-• Google, Brave, DuckDuckGo, Kagi, Startpage or any search URL you give it. Type an address to go straight there.
+A living background drawn entirely in characters ( # % = + o / | ), drifting behind the glass.
 
-MOTION
-• Seven entrances for the page (rise, fade, focus, bloom, drop, unfold, none) with the wait, duration and stagger you set. Reduced-motion settings are respected.
+🦋 Butterflies   🐟 Koi   🪼 Jellyfish   ✧ Dragonflies
+🐸 Frogs   🕊️ Cranes   🦀 Crabs
 
-PRIVATE BY DESIGN
-Vitre has no account, no analytics and no server. Your settings and pictures stay in your browser. Export them to a file and import them anywhere.
+  ▸ Five moods in one click: Natural, Calm, Swarm, Distant, Vivid
+  ▸ A fine-tune panel with every knob: density, speed, size, depth, colour and more, saved per animal
+  ▸ Click anywhere on the page to startle them
+  ▸ Plus a second grain style and a grain size, from fine film to coarse speckle
 
-Open source (MIT): https://github.com/TLacault/vitre
+━━━━━━━━━━━━━━━━━━━━
+
+🖼️ YOUR BACKGROUND
+  ◇ ASCII animals, your own pictures, or a living mesh gradient in nine palettes
+  ◇ Pictures are cached in the browser, so a new tab opens instantly, even offline
+  ◇ A new picture on every tab, every few hours, or always the same
+  ◇ Blur, dim and grain on top of any of them
+  ◇ Eight ways for it to arrive: iris, grid, plasma, zoom out, wipe, blinds, fade or none
+
+🧊 GLASS, YOUR WAY
+  ◇ Frost, tint, saturation, rim light and roundness, all live as you drag
+  ◇ A clock in glass digits cut out of the glass itself, or plain, at any size and weight
+  ◇ A welcome line that greets you by the time of day
+  ◇ Dark, light or follow the system, with an accent colour and three typefaces
+
+⭐ YOUR SITES
+  ◇ Favourite tabs as glass buttons, with or without labels, in as many columns as you like
+  ◇ 3,500 brand marks (YouTube, Netflix, GitHub, Spotify…) and 1,600 icons, all searchable
+  ◇ Or the site's own icon, or a letter
+  ◇ Drag to reorder; a new tab names itself after its site
+
+🔍 SEARCH
+  ◇ Google, Brave, DuckDuckGo, Kagi, Startpage or any search URL you give it
+  ◇ Type an address to go straight there
+
+✨ MOTION
+  ◇ Seven entrances for the page: rise, fade, focus, bloom, drop, unfold, none
+  ◇ Set the wait, duration and stagger, with a live preview
+  ◇ No black flash: a new tab opens on your last background's tone
+  ◇ Reduced-motion settings are respected
+
+🔒 PRIVATE BY DESIGN
+  ◇ No account, no analytics, no server
+  ◇ Settings and pictures stay in your browser
+  ◇ Export them to a file and import them anywhere
+
+━━━━━━━━━━━━━━━━━━━━
+
+⌥ Open source (MIT): https://github.com/TLacault/vitre
+Made with care for Brave, Chrome and Firefox.
 
 ## Graphic assets
 
