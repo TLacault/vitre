@@ -2,6 +2,8 @@ import { Fragment, useEffect, useRef, useState, type CSSProperties } from 'react
 import { createPortal } from 'react-dom'
 import { Button, Glass, Input, Switch, TabBar } from './ui'
 import GripVertical from 'lucide-react/icons/grip-vertical'
+import Bird from 'lucide-react/icons/bird'
+import Fish from 'lucide-react/icons/fish'
 import Clock3 from 'lucide-react/icons/clock-3'
 import Download from 'lucide-react/icons/download'
 import Droplet from 'lucide-react/icons/droplet'
@@ -97,6 +99,21 @@ const moods: [string, Record<string, number>][] = [
 
 type Fine = { fine?: boolean; setFine?: (v: boolean) => void }
 
+/** Lucide-style strokes for the animals Lucide doesn't draw. */
+const ANIMAL_PATHS: Record<string, string> = {
+  butterflies: 'M12 8v11M12 8l-2-4M12 8l2-4M12 11C10 6 5 3 4 6s2 6 8 6M12 11c2-5 7-8 8-5s-2 6-8 6M12 12c-4 0-7 3-6 6s5 0 6-4M12 12c4 0 7 3 6 6s-5 0-6-4',
+  jellyfish: 'M5 12a7 7 0 0 1 14 0zM8 12c-1 3 1 5 0 8M12 12c-1 3 1 5 0 8M16 12c-1 3 1 5 0 8',
+  dragonflies: 'M12 7v14M12 3.5v1M12 9C8 6 3 6 3 8s5 2 9 1M12 9c4-3 9-3 9-1s-5 2-9 1M12 11c-4 0-8 1-8 2.5s4 .5 8-2.5M12 11c4 0 8 1 8 2.5s-4 .5-8-2.5',
+  frogs: 'M5.5 9.5C3 12 3 17 6 19h12c3-2 3-7 .5-9.5M9 14q3 2 6 0M10.5 7a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0M18.5 7a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0',
+  crabs: 'M6 14a6 4 0 1 0 12 0 6 4 0 1 0-12 0M10 10V8M14 10V8M7 12 5 9M17 12l2-3M6.5 16 3 18M7.5 17.5 5 20M17.5 16l3.5 2M16.5 17.5 19 20M5 9a2 2 0 1 1 1.5-3.5M19 9a2 2 0 1 0-1.5-3.5',
+}
+
+function AnimalIcon({ k }: { k: string }) {
+  if (k === 'koi') return <Fish size={20} />
+  if (k === 'cranes') return <Bird size={20} />
+  return <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d={ANIMAL_PATHS[k]} /></svg>
+}
+
 /** The animal and a mood; every knob lives in the fine-tune panel beside the settings. */
 function AnimalsTab({ s, fine, setFine }: { s: Settings } & Fine) {
   const { kind, tune } = s.animals
@@ -109,7 +126,7 @@ function AnimalsTab({ s, fine, setFine }: { s: Settings } & Fine) {
         <div className="palettes">
           {ANIMAL_KEYS.map(k => (
             <button type="button" key={k} className="palette" aria-pressed={kind === k} onClick={() => set('animals.kind', k)}>
-              <i style={{ background: `rgb(${ANIMALS[k].swatch.join(' ')})` }} />
+              <i className="glyph" style={{ background: `rgb(${ANIMALS[k].swatch.join(' ')})` }}><AnimalIcon k={k} /></i>
               <span>{ANIMALS[k].label}</span>
             </button>
           ))}
