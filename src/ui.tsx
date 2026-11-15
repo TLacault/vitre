@@ -58,12 +58,14 @@ export function Slider({ value, onValueChange, min = 0, max = 100, step = 1, ...
     <div ref={track} className="slider" role="slider" tabIndex={0} aria-valuemin={min} aria-valuemax={max} aria-valuenow={value} {...p}
       style={{ '--p': `${pct}%` } as CSSProperties} onKeyDown={onKey}
       onPointerDown={e => {
+        e.preventDefault() // no text selection, so the next press can't start a native drag of it and cancel ours
+        e.currentTarget.focus()
         e.currentTarget.setPointerCapture(e.pointerId)
         e.currentTarget.dataset.drag = ''
         at(e.clientX)
       }}
       onPointerMove={e => e.currentTarget.hasPointerCapture(e.pointerId) && at(e.clientX)}
-      onPointerUp={e => delete e.currentTarget.dataset.drag}>
+      onLostPointerCapture={e => delete e.currentTarget.dataset.drag}>
       <i className="slider-fill" /><i className="slider-thumb" />
     </div>
   )

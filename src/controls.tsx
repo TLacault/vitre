@@ -66,6 +66,7 @@ function drag(el: HTMLElement, e: React.PointerEvent, on: (x: number, y: number)
     const r = el.getBoundingClientRect()
     on(Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height)))
   }
+  e.preventDefault() // same as the slider: no selection to native-drag on the next press
   move(e.nativeEvent)
   el.setPointerCapture(e.pointerId)
   el.onpointermove = move

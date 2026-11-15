@@ -47,7 +47,12 @@ function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
   const b = s.bg, sh = s.shader
   return (
     <>
-      <Choice label="Kind" path="bg.kind" value={b.kind} items={[['shader', 'Shader'], ['image', 'Image'], ['animals', 'Animals']]} />
+      <Range label="Blur" path="bg.blur" value={b.blur} min={0} max={40} step={1} unit="px" />
+      <Range label="Dim" path="bg.dim" value={b.dim} min={0} max={0.8} fmt={v => `${Math.round(v * 100)}%`} />
+      <Reveals s={s} />
+      <Toggle label="Grain" path="bg.grain" value={b.grain} />
+      {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={1} fmt={v => `${Math.round(v * 100)}%`} />}
+      <Choice label="Kind" path="bg.kind" value={b.kind} items={[['animals', 'Animals'], ['shader', 'Shader'], ['image', 'Image']]} />
       {b.kind === 'animals' ? <AnimalsTab s={s} fine={fine} setFine={setFine} /> : b.kind === 'image' ? (
         <>
           <Row label="Gallery" hint={`${pics.length} cached`}>
@@ -79,11 +84,6 @@ function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
           <Range label="Swirl" path="shader.swirl" value={sh.swirl} min={0} max={1} />
         </>
       )}
-      <Range label="Blur" path="bg.blur" value={b.blur} min={0} max={40} step={1} unit="px" />
-      <Range label="Dim" path="bg.dim" value={b.dim} min={0} max={0.8} fmt={v => `${Math.round(v * 100)}%`} />
-      <Reveals s={s} />
-      <Toggle label="Grain" path="bg.grain" value={b.grain} />
-      {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={0.5} fmt={v => `${Math.round(v * 100)}%`} />}
     </>
   )
 }

@@ -267,7 +267,7 @@ button { font: inherit; color: inherit; }
 .switch:active i { scale: 1.2 1; }
 .switch[aria-checked='true'] i { transform-origin: right center; }
 
-.slider { position: relative; height: 22px; cursor: pointer; touch-action: none; outline-offset: 4px; border-radius: 11px; }
+.slider { position: relative; height: 22px; cursor: pointer; touch-action: none; user-select: none; outline-offset: 4px; border-radius: 11px; }
 .slider::before { content: ''; position: absolute; inset: 9px 0; border-radius: 2px; background: var(--track); }
 .slider-fill { position: absolute; top: 9px; left: 0; height: 4px; width: var(--p); border-radius: 2px; background: var(--accent); }
 .slider-thumb {
