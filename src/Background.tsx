@@ -93,6 +93,14 @@ function Animals({ onReady }: { onReady: () => void }) {
   return <canvas ref={el} className="layer ascii" />
 }
 
+/** Fractal noise tile; past size 1 the dots get bigger and only the strongest ones stay, so it thins out too. */
+export function grain(size: number) {
+  const f = Math.min(1, (size - 1) / 5), tile = Math.round(220 * size)
+  const alpha = `${(1.4 + 3.6 * f).toFixed(2)} ${(-0.2 - 2.6 * f).toFixed(2)}`
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${tile}' height='${tile}'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='${(0.85 / size).toFixed(4)}' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 ${alpha}'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+}
+
 export function Background() {
   const s = useSettings().bg
   const empty = !usePics().length // an empty gallery falls back to the shader
@@ -111,7 +119,7 @@ export function Background() {
           {s.kind === 'animals' ? <Animals onReady={onReady} /> : s.kind === 'image' && !empty ? <Photo onReady={onReady} /> : <Shader onReady={onReady} />}
         </div>
         <div className="layer" style={{ background: `rgb(0 0 0 / ${s.dim})` }} />
-        {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity }} />}
+        {s.grain && <div className="layer grain" style={{ opacity: s.grainOpacity, backgroundImage: grain(s.grainSize) }} />}
       </Reveal>
     </div>
   )

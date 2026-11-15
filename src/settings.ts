@@ -20,6 +20,7 @@ export const defaults = {
     fixedId: 'default',
     grain: true,
     grainOpacity: 0.5,
+    grainSize: 1,
     kind: 'image' as 'shader' | 'image' | 'animals',
     periodHours: 24,
     reveal: 'iris' as Reveal,
