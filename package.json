@@ -1,6 +1,6 @@
 {
   "name": "vitre",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A frosted glass new tab page for Brave, Chrome and Firefox",
   "scripts": {
     "dev": "vite",

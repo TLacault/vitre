@@ -3,7 +3,7 @@
   "name": "Vitre – Glass New Tab",
   "short_name": "Vitre",
   "description": "A new tab made of glass: your picture or a living gradient, a glass clock, search and your sites. Customise everything.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },

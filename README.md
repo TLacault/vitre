@@ -41,7 +41,7 @@ Favourite tabs as glass buttons, in as many columns as you like, labels on or of
 
 <img src="store/screenshot-4-shader.png" alt="Shader background" width="100%">
 
-Drop in your own pictures: they're cached in the browser, so a new tab opens instantly, even offline. Show a new one on every tab, every few hours, or always the same. Or pick a slow mesh gradient in one of nine palettes and tune its motion, vibrance and luminosity. Grain, blur and dim on top of either.
+Drop in your own pictures: they're cached in the browser, so a new tab opens instantly, even offline. Show a new one on every tab, every few hours, or always the same. Or pick a slow mesh gradient in one of nine palettes and tune its motion, vibrance and luminosity. Or let ASCII animals drift across it: butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs, each with five moods and every knob to fine-tune. Blur, dim and grain on top of any of them, with two grain styles and a size from fine to coarse.
 
 ## Choose how it arrives
 

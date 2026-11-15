@@ -488,7 +488,7 @@ function Footer({ s }: { s: Settings }) {
 function alertless(msg: string) { document.querySelector('.panel-status')!.textContent = msg }
 
 const tabs = [
-  { value: 'bg', label: 'Picture', icon: <ImageIcon size={16} />, C: BackgroundTab },
+  { value: 'bg', label: 'Look', icon: <ImageIcon size={16} />, C: BackgroundTab },
   { value: 'look', label: 'Glass', icon: <Droplet size={16} />, C: Look },
   { value: 'clock', label: 'Text', icon: <Clock3 size={16} />, C: ClockTab },
   { value: 'search', label: 'Search', icon: <Search size={16} />, C: SearchTab },

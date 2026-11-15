@@ -26,7 +26,8 @@ YOUR BACKGROUND
 • Add your own pictures. They are cached in the browser, so a new tab opens instantly, even offline.
 • Show a new one on every tab, every few hours, or always the same.
 • Or pick a living mesh gradient in one of nine palettes, with its motion, vibrance and luminosity.
-• Grain, blur and dim on top of either.
+• Or let ASCII animals drift across it: butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs, each with five moods and every knob to fine-tune.
+• Blur, dim and grain on top of any of them, with two grain styles and a size from fine to coarse.
 • Eight reveals for how it arrives: iris, grid, plasma, zoom out, wipe, blinds, fade or none.
 
 GLASS, YOUR WAY
