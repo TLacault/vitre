@@ -39,7 +39,7 @@ const open = sel => async page => { await page.click(sel); await sleep(500) }
 const tab = n => async page => { await page.click('.gear'); await sleep(400); await page.click(`.tabbar button:nth-of-type(${n})`); await sleep(500) }
 
 const photo = { bg: { kind: 'image' } }
-await scene('1-home', {}, () => sleep(4000)) // the defaults: butterflies; give the flock time to fill the screen
+// 1-home is a real capture of the author's tab, kept in store/home.png
 await scene('2-animals', { animals: { kind: 'koi' } }, async page => {
   await tab(1)(page)
   await page.evaluate(() => document.querySelector('.panel-body .palettes')?.scrollIntoView({ block: 'center' }))
@@ -54,7 +54,7 @@ await scene('4-tabs', { ...photo, tiles: { brandColours: true } }, async page =>
 await scene('5-shader', { bg: { kind: 'shader' }, shader: { palette: 'aurora', light: 0.8 }, tiles: { labels: true } }, tab(6))
 
 // ——— framing
-const img = f => `data:image/png;base64,${readFileSync(`${OUT}raw/${f}.png`).toString('base64')}`
+const img = f => `data:image/png;base64,${readFileSync(f === '1-home' ? `${OUT}home.png` : `${OUT}raw/${f}.png`).toString('base64')}`
 const wall = `data:image/webp;base64,${readFileSync(new URL('../public/wallpapers/default.webp', import.meta.url)).toString('base64')}`
 const icon = readFileSync(new URL('../public/icon.svg', import.meta.url), 'utf8')
 const fonts = `<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;500;600&display=block" rel="stylesheet">`
