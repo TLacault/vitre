@@ -38,15 +38,20 @@ async function scene(name, patch, act = async () => {}) {
 const open = sel => async page => { await page.click(sel); await sleep(500) }
 const tab = n => async page => { await page.click('.gear'); await sleep(400); await page.click(`.tabbar button:nth-of-type(${n})`); await sleep(500) }
 
-await scene('1-home', {})
-await scene('2-glass', {}, tab(2))
-await scene('3-tabs', { tiles: { brandColours: true } }, async page => {
+const photo = { bg: { kind: 'image' } }
+await scene('1-home', {}, () => sleep(4000)) // the defaults: butterflies; give the flock time to fill the screen
+await scene('2-animals', { animals: { kind: 'koi' } }, async page => {
+  await tab(1)(page)
+  await page.evaluate(() => document.querySelector('.panel-body .palettes')?.scrollIntoView({ block: 'center' }))
+  await page.click('.panel-body button[aria-expanded]'); await sleep(3500)
+})
+await scene('3-glass', photo, tab(2))
+await scene('4-tabs', { ...photo, tiles: { brandColours: true } }, async page => {
   await open('.dock-btn')(page)
   await page.click('.panel-tabs .tile-row:nth-of-type(4) .icon-btn'); await sleep(300)
   await page.keyboard.type('go'); await sleep(1500)
 })
-await scene('4-shader', { bg: { kind: 'shader' }, shader: { palette: 'dusk', light: 1, vibrance: 1.1 }, clock: { glass: false, weight: 200 } }, tab(1))
-await scene('5-motion', { bg: { kind: 'shader' }, shader: { palette: 'aurora', light: 0.8 }, tiles: { labels: true } }, tab(6))
+await scene('5-shader', { bg: { kind: 'shader' }, shader: { palette: 'aurora', light: 0.8 }, tiles: { labels: true } }, tab(6))
 
 // ——— framing
 const img = f => `data:image/png;base64,${readFileSync(`${OUT}raw/${f}.png`).toString('base64')}`
@@ -65,11 +70,11 @@ async function render(file, w, h, html) {
 }
 
 const shots = [
-  ['1-home', 'A new tab made of glass', 'Your picture, a clock in glass digits, search and your sites. Nothing else.'],
-  ['2-glass', 'Tune every surface', 'Frost, tint, saturation, rim light and roundness, live as you drag.'],
-  ['3-tabs', '3,500 brand icons, 1,600 more', 'Search any brand or icon for your favourite sites. Drag to reorder.'],
-  ['4-shader', 'Your pictures, or a living gradient', 'A gallery cached in the browser, or a slow mesh gradient in nine palettes.'],
-  ['5-motion', 'Choose how it arrives', 'Seven entrances and eight background reveals, with the timing you set.'],
+  ['1-home', 'A new tab made of glass', 'ASCII animals drifting behind a glass clock, search and your sites.'],
+  ['2-animals', 'Seven animals, every knob', 'Butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs. Five moods, or fine-tune it all.'],
+  ['3-glass', 'Tune every surface', 'Frost, tint, saturation, rim light and roundness, live as you drag.'],
+  ['4-tabs', '3,500 brand icons, 1,600 more', 'Search any brand or icon for your favourite sites. Drag to reorder.'],
+  ['5-shader', 'Your pictures, or a living gradient', 'Your own photos or a slow mesh gradient, with seven entrances and eight reveals.'],
 ]
 for (const [f, title, sub] of shots) await render(`screenshot-${f}.png`, 1280, 800, `
   <div style="position:absolute;inset:0;background:url(${wall}) center/cover;filter:blur(40px) brightness(.45);transform:scale(1.2)"></div>

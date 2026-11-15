@@ -57,7 +57,7 @@ Open source (MIT): https://github.com/TLacault/vitre
 | Field | File |
 |---|---|
 | Store icon (128×128) | `../public/icon-128.png` |
-| Screenshots (1280×800), in this order | `screenshot-1-home.png`, `screenshot-2-glass.png`, `screenshot-3-tabs.png`, `screenshot-4-shader.png`, `screenshot-5-motion.png` |
+| Screenshots (1280×800), in this order | `screenshot-1-home.png`, `screenshot-2-animals.png`, `screenshot-3-glass.png`, `screenshot-4-tabs.png`, `screenshot-5-shader.png` |
 | Small promo tile (440×280) | `promo-small-440x280.png` |
 | Marquee promo tile (1400×560) | `promo-marquee-1400x560.png` |
 
