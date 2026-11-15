@@ -362,6 +362,7 @@ button { font: inherit; color: inherit; }
 .panel-foot .btn:hover { background: var(--hover); }
 
 .section { margin: 10px 0 -4px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); }
+.section:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .row { display: grid; gap: 9px; }
 .row-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; font-weight: 500; }
 .row-label output { font: 500 12px/1 'Geist Mono Variable', monospace; color: var(--soft); font-variant-numeric: tabular-nums; }

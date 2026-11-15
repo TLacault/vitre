@@ -47,6 +47,7 @@ function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
   const b = s.bg, sh = s.shader
   return (
     <>
+      <h3 className="section">Effects</h3>
       <Range label="Blur" path="bg.blur" value={b.blur} min={0} max={40} step={1} unit="px" />
       <Range label="Dim" path="bg.dim" value={b.dim} min={0} max={0.8} fmt={v => `${Math.round(v * 100)}%`} />
       <Reveals s={s} />
@@ -54,6 +55,7 @@ function BackgroundTab({ s, fine, setFine }: { s: Settings } & Fine) {
       {b.grain && <Choice label="Grain style" path="bg.grainStyle" value={b.grainStyle} items={[['fine', 'Fine'], ['grid', 'The Grid']]} />}
       {b.grain && <Range label="Grain opacity" path="bg.grainOpacity" value={b.grainOpacity} min={0} max={1} fmt={v => `${Math.round(v * 100)}%`} />}
       {b.grain && <Range label="Grain size" path="bg.grainSize" value={b.grainSize} min={1} max={6} step={0.1} unit="×" />}
+      <h3 className="section">Wallpaper</h3>
       <Choice label="Kind" path="bg.kind" value={b.kind} items={[['animals', 'Animals'], ['shader', 'Shader'], ['image', 'Image']]} />
       {b.kind === 'animals' ? <AnimalsTab s={s} fine={fine} setFine={setFine} /> : b.kind === 'image' ? (
         <>
