@@ -1,6 +1,6 @@
 # Chrome Web Store listing — Vitre
 
-Package: `vitre-chrome-1.0.0.zip` (`pnpm zip`). Images in this folder. Copy each field as is.
+Package: `vitre-chrome-<version>.zip` (`pnpm zip`), or `pnpm release chrome` to upload and publish it. Images in this folder. Copy each field as is.
 
 ## Store listing
 

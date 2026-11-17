@@ -3,3 +3,5 @@ dist
 *.zip
 public/brands.json
 store/raw
+.env.store
+web-ext-artifacts

@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>A new tab made of glass.</b><br>
-  Your picture or a living gradient, a clock cut out of glass, search and your sites. Nothing else.
+  ASCII animals, your pictures or a living gradient, behind a clock cut out of glass, search and your sites. Nothing else.
 </p>
 
 <p align="center">
@@ -21,9 +21,17 @@
 
 ---
 
-Every new tab is a moment you look at a hundred times a day. Vitre makes it a quiet pane of frosted glass over a picture you love: the background arrives with an iris, a plasma dissolve or a grid of tiles, then the clock, the search bar and your sites settle in on top, each one a piece of glass blurring what's behind it.
+Every new tab is a moment you look at a hundred times a day. Vitre makes it a quiet pane of frosted glass over a flock of ASCII animals, a picture you love or a slow gradient: the background arrives with an iris, a plasma dissolve or a grid of tiles, then the clock, the search bar and your sites settle in on top, each one a piece of glass blurring what's behind it.
 
 No feeds. No news. No account. No server. Just yours.
+
+<img src="store/screenshot-1-home.png" alt="Vitre with ASCII animals behind the glass clock, search and sites" width="100%">
+
+## ASCII animals
+
+<img src="store/screenshot-2-animals.png" alt="ASCII animals and their fine-tune panel" width="100%">
+
+Let ASCII animals drift behind the glass, the default since 1.1: butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs. Each comes with five moods (natural, calm, swarm, distant, vivid) and a fine-tune panel with every knob, saved per animal. Click anywhere to startle them. Built on [ascii-animals](src/ascii/README.md) (MIT).
 
 ## Glass, everywhere
 
@@ -42,12 +50,6 @@ Favourite tabs as glass buttons, in as many columns as you like, labels on or of
 <img src="store/screenshot-5-shader.png" alt="Shader background" width="100%">
 
 Drop in your own pictures: they're cached in the browser, so a new tab opens instantly, even offline. Show a new one on every tab, every few hours, or always the same. Or pick a slow mesh gradient in one of nine palettes and tune its motion, vibrance and luminosity. Blur, dim and grain on top of any of them, with two grain styles and a size from fine to coarse.
-
-## ASCII animals
-
-<img src="store/screenshot-2-animals.png" alt="ASCII animals and their fine-tune panel" width="100%">
-
-Or let ASCII animals drift behind the glass: butterflies, koi, jellyfish, dragonflies, frogs, cranes or crabs. Each comes with five moods (natural, calm, swarm, distant, vivid) and a fine-tune panel with every knob, saved per animal. Click anywhere to startle them. Built on [ascii-animals](src/ascii/README.md) (MIT).
 
 ## Choose how it arrives
 
@@ -75,7 +77,7 @@ pnpm build          # → dist/
 ```
 
 - **Brave / Chrome:** `brave://extensions` → Developer mode → *Load unpacked* → `dist/`
-- **Firefox:** `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on* → `dist/manifest.json`
+- **Firefox** (140 or later): `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on* → `dist/manifest.json`
 
 ## Develop
 
@@ -84,9 +86,27 @@ pnpm dev            # the page on localhost:5173, settings in localStorage
 pnpm test           # node --test
 pnpm zip            # vitre-chrome-<v>.zip and vitre-firefox-<v>.zip
 pnpm shots <url>    # regenerate the store images from a running dev server
+pnpm release        # send the committed version to both stores (see Release)
 ```
 
 Vite + React + TypeScript. The glass and every control are hand-written (`src/ui.tsx`, `src/styles.css`); the gradient is [Paper Shaders](https://github.com/paper-design/shaders), brand marks are [Simple Icons](https://simpleicons.org) (CC0), icons are [Lucide](https://lucide.dev). Store listing and images live in [`store/`](store/LISTING.md).
+
+## Release
+
+Bump `version` in `public/manifest.json` and `package.json`, commit, then:
+
+```sh
+pnpm release            # both stores
+pnpm release firefox    # or one of them
+pnpm release chrome
+```
+
+It builds both zips and checks the tree is committed. It then sends Firefox the package, the source (`git archive` of the commit, which Mozilla rebuilds to review the bundle) and the listing generated from [`store/LISTING.md`](store/LISTING.md), and uploads and publishes the Chrome zip. Both stores review each version before it goes live. Keys go in `.env.store` (git-ignored, template in `.env.store.example`).
+
+One-time setup:
+
+- **Firefox:** sign in on [addons.mozilla.org](https://addons.mozilla.org/developers/), accept the developer agreement, then generate API credentials under [Manage API keys](https://addons.mozilla.org/developers/addon/api/key/) (`WEB_EXT_API_KEY`, `WEB_EXT_API_SECRET`). The first `pnpm release firefox` creates the listing, so there's no manual upload. Add the screenshots from `store/` on the listing page afterwards.
+- **Chrome:** the API can't create an item, so upload the first zip by hand in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole). Then, in a Google Cloud project, enable the *Chrome Web Store API*, create an OAuth client (type *Desktop app*) and get a refresh token for it ([guide](https://github.com/fregante/chrome-webstore-upload-keys)). Fill in `EXTENSION_ID` (from the item's dashboard URL), `PUBLISHER_ID` (Dashboard → Account), `CLIENT_ID`, `CLIENT_SECRET` and `REFRESH_TOKEN`.
 
 ## License
 
